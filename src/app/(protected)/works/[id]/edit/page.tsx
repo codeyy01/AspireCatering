@@ -32,9 +32,11 @@ export default function EditWorkPage({ params }: { params: { id: string } }) {
     fetchWork()
   }, [params.id])
 
-  async function handleSubmit(formData: FormData) {
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
     setLoading(true)
     setErrorMsg('')
+    const formData = new FormData(e.currentTarget)
     try {
       const result = await updateWork(params.id, formData)
       if (result?.error) {
@@ -70,7 +72,7 @@ export default function EditWorkPage({ params }: { params: { id: string } }) {
         <h1 className="text-xl font-bold text-slate-900">Edit Work</h1>
       </div>
 
-      <form action={handleSubmit} className="space-y-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+      <form onSubmit={onSubmit} className="space-y-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
         
         {errorMsg && (
           <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg text-center">
