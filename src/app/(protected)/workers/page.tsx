@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
 import { Plus, IndianRupee } from 'lucide-react'
+import WorkersList from './WorkersList'
 
 export default async function WorkersPage({
   searchParams,
@@ -37,35 +38,8 @@ export default async function WorkersPage({
         </Link>
       </div>
 
-      <div className="space-y-3 mt-4">
-        {(!workers || workers.length === 0) ? (
-          <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center text-slate-500 text-sm">
-            No workers found.
-          </div>
-        ) : (
-          workers.map(worker => (
-            <Link key={worker.id} href={`/workers/${worker.id}`} className="block bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:border-slate-300 transition-colors">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-slate-100 text-slate-600 rounded-full flex items-center justify-center font-bold text-lg">
-                    {worker.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-slate-900">{worker.name}</h3>
-                    <p className="text-xs text-slate-500 capitalize">{worker.role || 'Worker'}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm font-bold text-slate-900 flex items-center justify-end">
-                    <IndianRupee className="w-3 h-3 mr-0.5" />
-                    {Number(worker.default_rate || 0).toLocaleString()}
-                  </div>
-                  <div className="text-[10px] text-slate-500 uppercase tracking-wider mt-0.5">Rate</div>
-                </div>
-              </div>
-            </Link>
-          ))
-        )}
+      <div className="mt-4">
+        <WorkersList workers={workers || []} />
       </div>
     </div>
   )

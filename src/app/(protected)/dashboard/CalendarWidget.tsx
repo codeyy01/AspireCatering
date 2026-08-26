@@ -11,6 +11,8 @@ type Work = {
   event_date: string
   status: string
   total_amount?: number
+  guest_count?: number
+  work_assignments?: { count: number }[]
 }
 
 export default function CalendarWidget({ works }: { works: Work[] }) {
@@ -124,8 +126,14 @@ export default function CalendarWidget({ works }: { works: Work[] }) {
                   <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex justify-between items-center">
                     <div>
                       <h4 className="font-bold text-slate-900">{work.title}</h4>
-                      <div className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider mt-1.5 ${statusColor}`}>
-                        {work.status}
+                      <div className="flex items-center space-x-2 mt-1.5">
+                        <div className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${statusColor}`}>
+                          {work.status}
+                        </div>
+                        <div className="flex items-center text-xs font-medium text-slate-500">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                          {work.work_assignments?.[0]?.count || 0} / {work.guest_count || 0}
+                        </div>
                       </div>
                     </div>
                     <div className="text-right">
