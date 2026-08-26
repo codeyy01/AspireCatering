@@ -11,17 +11,24 @@ export default async function WorksPage({
   const supabase = createClient()
   const statusFilter = searchParams.status || 'upcoming'
   
-  let query = supabase.from('works').select('*, work_assignments(count)').order('event_date', { ascending: statusFilter === 'upcoming' })
-  
-  if (statusFilter !== 'all') {
-    query = query.eq('status', statusFilter)
+  const { data: allWorks } = await supabase
+    .from('works')
+    .select('*, work_assignments(count)')
+    .order('event_date', { ascending: statusFilter !== 'completed' })
+
+  let works = allWorks || []
+
+  if (statusFilter === 'upcoming') {
+    works = works.filter(w => w.status !== 'completed' && w.status !== 'cancelled' && (w.work_assignments?.[0]?.count || 0) < (w.guest_count || 0))
+  } else if (statusFilter === 'ongoing') {
+    works = works.filter(w => w.status !== 'completed' && w.status !== 'cancelled' && (w.work_assignments?.[0]?.count || 0) >= (w.guest_count || 0))
+  } else if (statusFilter === 'completed') {
+    works = works.filter(w => w.status === 'completed')
   }
 
-  const { data: works } = await query
-
   const tabs = [
-    { id: 'upcoming', label: 'Upcoming' },
-    { id: 'ongoing', label: 'Ongoing' },
+    { id: 'upcoming', label: 'Needs Workers' },
+    { id: 'ongoing', label: 'Workers Filled' },
     { id: 'completed', label: 'Completed' },
     { id: 'all', label: 'All' },
   ]
@@ -62,19 +69,26 @@ export default async function WorksPage({
             No works found.
           </div>
         ) : (
-          works.map(work => (
-            <Link key={work.id} href={`/works/${work.id}`} className="block bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:border-slate-300 transition-colors">
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="font-bold text-slate-900 text-lg">{work.title}</h3>
-                <span className={`text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide
-                  ${work.status === 'upcoming' ? 'bg-amber-100 text-amber-700' : ''}
-                  ${work.status === 'ongoing' ? 'bg-blue-100 text-blue-700' : ''}
-                  ${work.status === 'completed' ? 'bg-emerald-100 text-emerald-700' : ''}
-                  ${work.status === 'cancelled' ? 'bg-slate-100 text-slate-700' : ''}
-                `}>
-                  {work.status}
-                </span>
-              </div>
+          works.map(work => {
+            const isFilled = (work.work_assignments?.[0]?.count || 0) >= (work.guest_count || 0)
+            let displayStatus = work.status
+            if (work.status !== 'completed' && work.status !== 'cancelled') {
+              displayStatus = isFilled ? 'Staffed' : 'Needs Staff'
+            }
+
+            return (
+              <Link key={work.id} href={`/works/${work.id}`} className="block bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:border-slate-300 transition-colors">
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="font-bold text-slate-900 text-lg">{work.title}</h3>
+                  <span className={`text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide
+                    ${displayStatus === 'Needs Staff' ? 'bg-amber-100 text-amber-700' : ''}
+                    ${displayStatus === 'Staffed' ? 'bg-blue-100 text-blue-700' : ''}
+                    ${displayStatus === 'completed' ? 'bg-emerald-100 text-emerald-700' : ''}
+                    ${displayStatus === 'cancelled' ? 'bg-slate-100 text-slate-700' : ''}
+                  `}>
+                    {displayStatus}
+                  </span>
+                </div>
               
               <div className="flex flex-col space-y-1 mt-3">
                 <div className="flex items-center text-sm text-slate-600">
@@ -102,8 +116,8 @@ export default async function WorksPage({
                 </div>
               </div>
             </Link>
-          ))
-        )}
+          )
+        })}
       </div>
     </div>
   )

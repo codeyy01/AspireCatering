@@ -16,6 +16,7 @@ export default function WorkersList({ workers }: { workers: Worker[] }) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [isDeleting, setIsDeleting] = useState(false)
   const [selectionMode, setSelectionMode] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
 
   const toggleSelect = (e: React.MouseEvent, id: string) => {
     e.preventDefault()
@@ -26,11 +27,11 @@ export default function WorkersList({ workers }: { workers: Worker[] }) {
   }
 
   const handleDelete = async () => {
-    if (!confirm(`Are you sure you want to delete ${selectedIds.size} worker(s)? This will also remove them from any assigned works.`)) return
     setIsDeleting(true)
     await deleteWorkers(Array.from(selectedIds))
     setSelectedIds(new Set())
     setSelectionMode(false)
+    setShowConfirm(false)
     setIsDeleting(false)
   }
 
@@ -107,13 +108,42 @@ export default function WorkersList({ workers }: { workers: Worker[] }) {
           <div className="bg-slate-900 text-white rounded-2xl p-4 shadow-lg flex items-center justify-between">
             <span className="font-semibold">{selectedIds.size} selected</span>
             <button 
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="flex items-center bg-red-500 text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-red-600 active:scale-95 transition-all disabled:opacity-50"
+              onClick={() => setShowConfirm(true)}
+              className="flex items-center bg-red-500 text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-red-600 active:scale-95 transition-all"
             >
-              {isDeleting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Trash2 className="w-4 h-4 mr-2" />}
+              <Trash2 className="w-4 h-4 mr-2" />
               Delete
             </button>
+          </div>
+        </div>
+      )}
+
+      {showConfirm && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-4 mx-auto">
+              <Trash2 className="w-6 h-6" />
+            </div>
+            <h3 className="text-xl font-bold text-center text-slate-900 mb-2">Delete {selectedIds.size} Workers?</h3>
+            <p className="text-center text-slate-500 text-sm mb-6 leading-relaxed">
+              This action cannot be undone. They will also be removed from any works they are currently assigned to.
+            </p>
+            <div className="flex space-x-3">
+              <button 
+                onClick={() => setShowConfirm(false)}
+                disabled={isDeleting}
+                className="flex-1 py-3 px-4 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 active:scale-95 transition-all disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="flex-1 py-3 px-4 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 active:scale-95 transition-all disabled:opacity-50 flex justify-center items-center"
+              >
+                {isDeleting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Yes, Delete'}
+              </button>
+            </div>
           </div>
         </div>
       )}
