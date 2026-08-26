@@ -27,11 +27,16 @@ export default async function WorkDetailPage({
 
   return (
     <div className="space-y-4 pb-8 animate-in fade-in duration-300">
-      <div className="flex items-center space-x-3 mb-4">
-        <Link href="/works" className="p-2 bg-white rounded-full shadow-sm border border-slate-200">
-          <ArrowLeft className="w-5 h-5 text-slate-700" />
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center space-x-3">
+          <Link href="/works" className="p-2 bg-white rounded-full shadow-sm border border-slate-200">
+            <ArrowLeft className="w-5 h-5 text-slate-700" />
+          </Link>
+          <h1 className="text-xl font-bold text-slate-900 truncate max-w-[200px]">{work.title}</h1>
+        </div>
+        <Link href={`/works/${work.id}/edit`} className="text-sm font-medium text-slate-600 bg-white border border-slate-200 px-3 py-1.5 rounded-lg active:scale-95 transition-transform">
+          Edit
         </Link>
-        <h1 className="text-xl font-bold text-slate-900 truncate flex-1">{work.title}</h1>
       </div>
 
       {/* Work Details Card */}
