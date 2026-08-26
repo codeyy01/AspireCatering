@@ -16,7 +16,10 @@ export default function NewWorkPage() {
     setErrorMsg('')
     try {
       const result = await createWork(formData)
-      if (result?.success) {
+      if (result?.error) {
+        setErrorMsg(result.error)
+        setLoading(false)
+      } else if (result?.success) {
         router.push(`/works/${result.id}`)
       }
     } catch (err) {
