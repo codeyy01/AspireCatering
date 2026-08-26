@@ -12,6 +12,7 @@ export default function EditWorkPage({ params }: { params: { id: string } }) {
   const [loading, setLoading] = useState(false)
   const [initialLoading, setInitialLoading] = useState(true)
   const [errorMsg, setErrorMsg] = useState('')
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [work, setWork] = useState<any>(null)
 
   useEffect(() => {
