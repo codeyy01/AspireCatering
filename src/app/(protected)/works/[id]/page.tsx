@@ -3,6 +3,7 @@ import { format } from 'date-fns'
 import Link from 'next/link'
 import { ArrowLeft, MapPin, Phone, Users as UsersIcon, Trash2 } from 'lucide-react'
 import InlineAssign from './InlineAssign'
+import { IconButton } from '@/components/IconButton'
 import { updateWorkStatus, removeWorker } from './actions'
 import { notFound } from 'next/navigation'
 
@@ -141,9 +142,7 @@ export default async function WorkDetailPage({
                     'use server'
                     await removeWorker(assignment.id, work.id)
                   }}>
-                    <button type="submit" className="text-red-500 p-1.5 hover:bg-red-50 rounded-lg transition-colors">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <IconButton icon={Trash2} variant="danger" />
                   </form>
                 </div>
               </div>

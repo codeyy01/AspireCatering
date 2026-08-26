@@ -3,6 +3,7 @@ import { format } from 'date-fns'
 import Link from 'next/link'
 import { ArrowLeft, Phone, Briefcase, CheckCircle2 } from 'lucide-react'
 import { markAsPaid } from './actions'
+import { SubmitButton } from '@/components/SubmitButton'
 import { notFound } from 'next/navigation'
 
 export default async function WorkerDetailPage({
@@ -116,9 +117,9 @@ export default async function WorkerDetailPage({
                         'use server'
                         await markAsPaid(assignment.id, worker.id, owed)
                       }}>
-                        <button type="submit" className="flex items-center text-xs font-bold bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg active:scale-95 transition-transform">
-                          <CheckCircle2 className="w-4 h-4 mr-1" /> Pay Full
-                        </button>
+                        <SubmitButton className="flex items-center text-xs font-bold bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg active:scale-95 transition-transform disabled:opacity-50">
+                          <><CheckCircle2 className="w-4 h-4 mr-1" /> Pay Full</>
+                        </SubmitButton>
                       </form>
                     </div>
                   )}
