@@ -12,7 +12,7 @@ export async function assignWorkers(workId: string, formData: FormData) {
   const defaultAgreedAmount = agreedAmountRaw && !isNaN(parseFloat(agreedAmountRaw)) ? parseFloat(agreedAmountRaw) : 0
 
   if (!rawNames) {
-    redirect(`/works/${workId}`)
+    return { success: false, error: 'No names provided' }
   }
 
   // Parse names (split by comma or newline, trim, remove empty)
@@ -22,7 +22,7 @@ export async function assignWorkers(workId: string, formData: FormData) {
     .filter(n => n.length > 0)
 
   if (names.length === 0) {
-    redirect(`/works/${workId}`)
+    return { success: false, error: 'No valid names provided' }
   }
 
   // Find existing workers
@@ -83,5 +83,5 @@ export async function assignWorkers(workId: string, formData: FormData) {
 
   revalidatePath(`/works/${workId}`)
   revalidatePath('/workers')
-  redirect(`/works/${workId}`)
+  return { success: true }
 }
