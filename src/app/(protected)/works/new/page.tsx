@@ -1,8 +1,33 @@
+'use client'
+
 import { createWork } from './actions'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Loader2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useState } from 'react'
 
 export default function NewWorkPage() {
+  const router = useRouter()
+  const [loading, setLoading] = useState(false)
+  const [errorMsg, setErrorMsg] = useState('')
+
+  async function handleSubmit(formData: FormData) {
+    setLoading(true)
+    setErrorMsg('')
+    try {
+      const result = await createWork(formData)
+      if (result?.error) {
+        setErrorMsg(result.error)
+        setLoading(false)
+      } else if (result?.success) {
+        router.push(`/works/${result.id}`)
+      }
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Something went wrong')
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="space-y-4 pb-8 animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out">
       <div className="flex items-center space-x-3 mb-6">
@@ -12,11 +37,17 @@ export default function NewWorkPage() {
         <h1 className="text-xl font-bold text-slate-900">Add New Work</h1>
       </div>
 
-      <form action={createWork} className="space-y-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+      <form action={handleSubmit} className="space-y-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+        
+        {errorMsg && (
+          <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg text-center">
+            {errorMsg}
+          </div>
+        )}
         
         <div className="space-y-1">
-          <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Title *</label>
-          <input required name="title" type="text" placeholder="e.g. Menon Wedding" className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900" />
+          <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Title</label>
+          <input name="title" type="text" placeholder="e.g. Menon Wedding" className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900" />
         </div>
 
         <div className="space-y-1">
@@ -36,8 +67,8 @@ export default function NewWorkPage() {
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Venue</label>
-          <input name="venue" type="text" className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900" />
+          <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Venue *</label>
+          <input required name="venue" type="text" className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900" />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
@@ -46,8 +77,8 @@ export default function NewWorkPage() {
             <input name="total_amount" type="number" step="0.01" className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900" />
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Guest Count</label>
-            <input name="guest_count" type="number" className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900" />
+            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Workers Count *</label>
+            <input required name="guest_count" type="number" placeholder="No. of workers" className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900" />
           </div>
         </div>
 
@@ -62,8 +93,8 @@ export default function NewWorkPage() {
         </div>
 
         <div className="pt-2">
-          <button type="submit" className="w-full bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-slate-800 active:scale-95 transition-all">
-            Save Work
+          <button type="submit" disabled={loading} className="w-full flex items-center justify-center bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-slate-800 active:scale-95 transition-all disabled:opacity-70 disabled:active:scale-100">
+            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Save Work'}
           </button>
         </div>
       </form>

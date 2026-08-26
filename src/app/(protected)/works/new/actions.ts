@@ -7,7 +7,7 @@ import { redirect } from 'next/navigation'
 export async function createWork(formData: FormData) {
   const supabase = createClient()
   
-  const title = formData.get('title') as string
+  let title = formData.get('title') as string
   const client_name = formData.get('client_name') as string
   const client_phone = formData.get('client_phone') as string
   const venue = formData.get('venue') as string
@@ -16,6 +16,10 @@ export async function createWork(formData: FormData) {
   const total_amount = formData.get('total_amount') ? parseFloat(formData.get('total_amount') as string) : 0
   const referred_by = formData.get('referred_by') as string
   const notes = formData.get('notes') as string
+  
+  if (!title || title.trim() === '') {
+    title = `Work at ${venue || 'Unknown Venue'}`
+  }
 
   const { data, error } = await supabase
     .from('works')
@@ -35,11 +39,11 @@ export async function createWork(formData: FormData) {
     ])
     .select()
 
-  if (error) {
-    console.error(error)
-    throw new Error('Failed to create work')
+  if (error || !data || data.length === 0) {
+    console.error("Insert Error:", error)
+    throw new Error('Failed to create work: ' + (error?.message || 'No data returned'))
   }
 
   revalidatePath('/works')
-  redirect(`/works/${data[0].id}`)
+  return { success: true, id: data[0].id }
 }
