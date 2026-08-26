@@ -1,8 +1,9 @@
 'use client'
 import { Loader2 } from 'lucide-react'
 import { useFormStatus } from 'react-dom'
+import React from 'react'
 
-export function IconButton({ icon: Icon, variant = 'danger' }: { icon: any, variant?: 'danger' | 'primary' }) {
+export function IconButton({ icon: Icon, variant = 'danger' }: { icon: React.ElementType, variant?: 'danger' | 'primary' }) {
   const { pending } = useFormStatus()
   
   if (variant === 'danger') {

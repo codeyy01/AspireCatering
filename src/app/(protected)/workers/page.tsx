@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
-import { Plus, IndianRupee } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import WorkersList from './WorkersList'
 
 export default async function WorkersPage({
