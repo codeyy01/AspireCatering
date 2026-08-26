@@ -22,8 +22,12 @@ export default function NewWorkPage() {
       } else if (result?.success) {
         router.push(`/works/${result.id}`)
       }
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Something went wrong')
+    } catch (err) {
+      if (err instanceof Error) {
+        setErrorMsg(err.message)
+      } else {
+        setErrorMsg('Something went wrong')
+      }
       setLoading(false)
     }
   }
