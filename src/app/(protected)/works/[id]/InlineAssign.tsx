@@ -23,8 +23,12 @@ export default function InlineAssign({ workId }: { workId: string }) {
         // Success
         setIsAdding(false)
       }
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Something went wrong')
+    } catch (err) {
+      if (err instanceof Error) {
+        setErrorMsg(err.message)
+      } else {
+        setErrorMsg('Something went wrong')
+      }
     }
     setLoading(false)
   }

@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { format } from 'date-fns'
 import Link from 'next/link'
-import { ArrowLeft, Edit, MapPin, Phone, Users as UsersIcon, Trash2 } from 'lucide-react'
+import { ArrowLeft, MapPin, Phone, Users as UsersIcon, Trash2 } from 'lucide-react'
 import InlineAssign from './InlineAssign'
 import { updateWorkStatus, removeWorker } from './actions'
 import { notFound } from 'next/navigation'
