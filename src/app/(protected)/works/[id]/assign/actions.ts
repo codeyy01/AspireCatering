@@ -15,22 +15,30 @@ export async function assignWorkers(workId: string, formData: FormData) {
   }
 
   // Parse names (split by comma or newline, trim, remove empty)
-  const names = rawNames
+  const rawNamesList = rawNames
     .split(/[\n,]+/)
     .map(n => n.trim())
     .filter(n => n.length > 0)
+
+  // Deduplicate names (case-insensitive) keeping the first typed case
+  const uniqueNamesMap = new Map<string, string>()
+  for (const n of rawNamesList) {
+    if (!uniqueNamesMap.has(n.toLowerCase())) {
+      uniqueNamesMap.set(n.toLowerCase(), n)
+    }
+  }
+  const names = Array.from(uniqueNamesMap.values())
 
   if (names.length === 0) {
     return { success: false, error: 'No valid names provided' }
   }
 
-  // Find existing workers
-  const { data: existingWorkers } = await supabase
+  // Find existing workers (fetch all to do case-insensitive match in JS safely)
+  const { data: allWorkers } = await supabase
     .from('workers')
     .select('id, name, default_rate')
-    .in('name', names)
 
-  const existingMap = new Map((existingWorkers || []).map(w => [w.name.toLowerCase(), w]))
+  const existingMap = new Map((allWorkers || []).map(w => [w.name.toLowerCase(), w]))
 
   const newWorkersToInsert = []
   const assignmentsToInsert = []
