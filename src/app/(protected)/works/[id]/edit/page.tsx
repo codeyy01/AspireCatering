@@ -37,7 +37,10 @@ export default function EditWorkPage({ params }: { params: { id: string } }) {
     setErrorMsg('')
     try {
       const result = await updateWork(params.id, formData)
-      if (result?.success) {
+      if (result?.error) {
+        setErrorMsg(result.error)
+        setLoading(false)
+      } else if (result?.success) {
         router.push(`/works/${params.id}`)
       }
     } catch (err) {

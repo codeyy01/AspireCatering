@@ -11,8 +11,12 @@ export async function updateWork(workId: string, formData: FormData) {
   const client_phone = formData.get('client_phone') as string
   const venue = formData.get('venue') as string
   const event_date = formData.get('event_date') as string
-  const guest_count = formData.get('guest_count') ? parseInt(formData.get('guest_count') as string) : null
-  const total_amount = formData.get('total_amount') ? parseFloat(formData.get('total_amount') as string) : 0
+  const guestCountRaw = formData.get('guest_count') as string
+  const guest_count = guestCountRaw && !isNaN(parseInt(guestCountRaw)) ? parseInt(guestCountRaw) : null
+  
+  const totalAmountRaw = formData.get('total_amount') as string
+  const total_amount = totalAmountRaw && !isNaN(parseFloat(totalAmountRaw)) ? parseFloat(totalAmountRaw) : 0
+  
   const referred_by = formData.get('referred_by') as string
   const notes = formData.get('notes') as string
   
@@ -37,7 +41,7 @@ export async function updateWork(workId: string, formData: FormData) {
 
   if (error) {
     console.error("Update Error:", error)
-    throw new Error('Failed to update work: ' + error.message)
+    return { error: 'Failed to update work: ' + error.message }
   }
 
   revalidatePath(`/works/${workId}`)
