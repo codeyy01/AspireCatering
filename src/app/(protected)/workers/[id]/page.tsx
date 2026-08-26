@@ -83,9 +83,7 @@ export default async function WorkerDetailPage({
             </div>
           ) : (
             assignments.map(assignment => {
-              // @ts-expect-error Supabase types are not fully inferred here
               const workTitle = assignment.works?.title || 'Unknown Work'
-              // @ts-expect-error Supabase types are not fully inferred here
               const workDate = assignment.works?.event_date
               const owed = Number(assignment.agreed_amount) - Number(assignment.amount_paid)
 
@@ -93,7 +91,6 @@ export default async function WorkerDetailPage({
                 <div key={assignment.id} className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
                   <div className="flex justify-between items-start mb-2">
                     <div>
-                      {/* @ts-expect-error Supabase types are not fully inferred here */}
                       <Link href={`/works/${assignment.works?.id}`} className="font-bold text-slate-900 hover:underline">{workTitle}</Link>
                       <div className="text-xs text-slate-500 mt-0.5">
                         {workDate ? format(new Date(workDate), 'MMM d, yyyy') : 'No date'}
