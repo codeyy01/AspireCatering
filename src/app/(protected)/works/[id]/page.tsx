@@ -120,8 +120,8 @@ export default async function WorkDetailPage({
               <div key={assignment.id} className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col">
                 <div className="flex justify-between items-start">
                   <div>
-                    <div className="font-bold text-slate-900">{assignment.workers.name}</div>
-                    <div className="text-xs text-slate-500 capitalize">{assignment.workers.role || 'Worker'}</div>
+                    <div className="font-bold text-slate-900">{assignment.workers?.name || 'Unknown Worker'}</div>
+                    <div className="text-xs text-slate-500 capitalize">{assignment.workers?.role || 'Worker'}</div>
                   </div>
                   <div className="text-right">
                     <div className="font-bold text-slate-900">₹{Number(assignment.agreed_amount).toLocaleString()}</div>
