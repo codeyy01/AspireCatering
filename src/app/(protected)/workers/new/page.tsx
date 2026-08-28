@@ -1,8 +1,37 @@
+'use client'
+
 import { createWorker } from './actions'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Loader2 } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 
 export default function NewWorkerPage() {
+  const router = useRouter()
+  const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setError('')
+    setIsLoading(true)
+
+    const formData = new FormData(e.currentTarget)
+    
+    try {
+      const result = await createWorker(formData)
+      if (result?.error) {
+        setError(result.error)
+        setIsLoading(false)
+      } else {
+        router.push('/workers')
+      }
+    } catch (err) {
+      setError('An unexpected error occurred')
+      setIsLoading(false)
+    }
+  }
+
   return (
     <div className="space-y-4 pb-8 animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out">
       <div className="flex items-center space-x-3 mb-6">
@@ -12,7 +41,13 @@ export default function NewWorkerPage() {
         <h1 className="text-xl font-bold text-slate-900">Add New Worker</h1>
       </div>
 
-      <form action={createWorker} className="space-y-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+      {error && (
+        <div className="p-4 bg-red-50 text-red-600 rounded-xl text-sm font-medium border border-red-100">
+          {error}
+        </div>
+      )}
+
+      <form onSubmit={onSubmit} className="space-y-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
         
         <div className="space-y-1">
           <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Name *</label>
@@ -43,8 +78,8 @@ export default function NewWorkerPage() {
         </div>
 
         <div className="pt-2">
-          <button type="submit" className="w-full bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-slate-800 active:scale-95 transition-all">
-            Save Worker
+          <button type="submit" disabled={isLoading} className="w-full flex items-center justify-center bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-slate-800 active:scale-95 transition-all disabled:opacity-70 disabled:active:scale-100">
+            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Save Worker'}
           </button>
         </div>
       </form>

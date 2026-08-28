@@ -10,7 +10,8 @@ export async function createWorker(formData: FormData) {
   const name = formData.get('name') as string
   const phone = formData.get('phone') as string
   const role = formData.get('role') as string
-  const default_rate = formData.get('default_rate') ? parseFloat(formData.get('default_rate') as string) : 0
+  const rawRate = formData.get('default_rate') as string
+  const default_rate = rawRate && !isNaN(Number(rawRate)) ? parseFloat(rawRate) : 0
 
   const { error } = await supabase
     .from('workers')
@@ -26,9 +27,9 @@ export async function createWorker(formData: FormData) {
 
   if (error) {
     console.error(error)
-    throw new Error('Failed to create worker')
+    return { error: 'Failed to create worker. Please try again.' }
   }
 
   revalidatePath('/workers')
-  redirect('/workers')
+  return { success: true }
 }
