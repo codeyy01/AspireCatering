@@ -6,10 +6,15 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useState } from 'react'
 
-export default function NewWorkPage() {
+export default function NewWorkPage({
+  searchParams
+}: {
+  searchParams: { date?: string }
+}) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
+  const defaultDate = searchParams?.date || ''
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -58,7 +63,7 @@ export default function NewWorkPage() {
 
         <div className="space-y-1">
           <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Event Date *</label>
-          <input required name="event_date" type="date" className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900" />
+          <input required defaultValue={defaultDate} name="event_date" type="date" className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900" />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
