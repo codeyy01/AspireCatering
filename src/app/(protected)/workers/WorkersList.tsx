@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { IndianRupee, Trash2, Loader2, CheckSquare, Square } from 'lucide-react'
+import { Trash2, Loader2, CheckSquare, Square } from 'lucide-react'
 import { deleteWorkers } from './actions'
 
 type Worker = {
@@ -17,6 +17,7 @@ export default function WorkersList({ workers }: { workers: Worker[] }) {
   const [isDeleting, setIsDeleting] = useState(false)
   const [selectionMode, setSelectionMode] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const toggleSelect = (e: React.MouseEvent, id: string) => {
     e.preventDefault()
@@ -44,63 +45,84 @@ export default function WorkersList({ workers }: { workers: Worker[] }) {
     }
   }
 
-  if (!workers || workers.length === 0) {
-    return (
-      <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center text-slate-500 text-sm">
-        No workers found.
-      </div>
-    )
-  }
+  const filteredWorkers = workers.filter(w => 
+    w.name.toLowerCase().includes(searchQuery.toLowerCase())
+  )
 
   return (
     <>
-      <div className="flex justify-end mb-2">
-        <button 
-          onClick={toggleSelectionMode} 
-          className="text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg active:scale-95 transition-transform"
-        >
-          {selectionMode ? 'Cancel Selection' : 'Select Multiple'}
-        </button>
+      <div className="mb-4 space-y-3">
+        <div className="relative">
+          <svg className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input 
+            type="text" 
+            placeholder="Search workers..." 
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 shadow-sm"
+          />
+        </div>
+        <div className="flex justify-end">
+          <button 
+            onClick={toggleSelectionMode} 
+            className="text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg active:scale-95 transition-transform"
+          >
+            {selectionMode ? 'Cancel Selection' : 'Select Multiple'}
+          </button>
+        </div>
       </div>
 
-      <div className="space-y-3">
-        {workers.map(worker => {
-          const isSelected = selectedIds.has(worker.id)
-          return (
-            <Link 
-              key={worker.id} 
-              href={selectionMode ? '#' : `/workers/${worker.id}`} 
-              onClick={(e) => selectionMode && toggleSelect(e, worker.id)}
-              className={`block bg-white border rounded-2xl p-4 shadow-sm transition-colors ${
-                isSelected ? 'border-blue-500 ring-1 ring-blue-500 bg-blue-50/30' : 'border-slate-200 hover:border-slate-300'
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  {selectionMode && (
-                    <div className="mr-1 text-slate-400">
-                      {isSelected ? <CheckSquare className="w-5 h-5 text-blue-600" /> : <Square className="w-5 h-5" />}
+      <div className="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden mb-24">
+        {filteredWorkers.length === 0 ? (
+          <div className="p-8 text-center text-slate-500 text-sm">
+            No workers found.
+          </div>
+        ) : (
+          <div className="divide-y divide-slate-100">
+            {filteredWorkers.map(worker => {
+              const isSelected = selectedIds.has(worker.id)
+              // Assign a slight color tint based on the first letter of their name for a bit of flair
+              const colors = ['text-blue-600', 'text-emerald-600', 'text-rose-600', 'text-amber-600', 'text-indigo-600', 'text-violet-600']
+              const colorIndex = worker.name.charCodeAt(0) % colors.length
+              const roleColor = colors[colorIndex]
+
+              return (
+                <Link 
+                  key={worker.id} 
+                  href={selectionMode ? '#' : `/workers/${worker.id}`} 
+                  onClick={(e) => selectionMode && toggleSelect(e, worker.id)}
+                  className={`flex items-center justify-between p-4 transition-colors ${
+                    isSelected ? 'bg-blue-50/50' : 'hover:bg-slate-50'
+                  }`}
+                >
+                  <div className="flex items-center space-x-3 flex-1 min-w-0">
+                    {selectionMode && (
+                      <div className="shrink-0 text-slate-400">
+                        {isSelected ? <CheckSquare className="w-5 h-5 text-blue-600" /> : <Square className="w-5 h-5" />}
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0 pr-4">
+                      <h3 className="font-bold text-slate-900 truncate text-base">{worker.name}</h3>
+                      {worker.role && (
+                        <p className={`text-[10px] font-bold uppercase tracking-wider mt-0.5 truncate ${roleColor}`}>
+                          {worker.role}
+                        </p>
+                      )}
                     </div>
+                  </div>
+                  
+                  {!selectionMode && (
+                    <svg className="w-4 h-4 text-slate-300 shrink-0 -mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                    </svg>
                   )}
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ${isSelected ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'}`}>
-                    {worker.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-slate-900">{worker.name}</h3>
-                    <p className="text-xs text-slate-500 capitalize">{worker.role || 'Worker'}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm font-bold text-slate-900 flex items-center justify-end">
-                    <IndianRupee className="w-3 h-3 mr-0.5" />
-                    {Number(worker.default_rate || 0).toLocaleString()}
-                  </div>
-                  <div className="text-[10px] text-slate-500 uppercase tracking-wider mt-0.5">Rate</div>
-                </div>
-              </div>
-            </Link>
-          )
-        })}
+                </Link>
+              )
+            })}
+          </div>
+        )}
       </div>
 
       {selectionMode && selectedIds.size > 0 && (
