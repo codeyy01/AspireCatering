@@ -1,7 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
-import { format } from 'date-fns'
 import Link from 'next/link'
-import { Plus, MapPin, IndianRupee } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import WorksList from './WorksList'
 
 export default async function WorksPage({
