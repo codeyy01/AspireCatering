@@ -1,7 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { startOfMonth, endOfMonth, subMonths, addMonths } from 'date-fns'
 import { IndianRupee, Briefcase } from 'lucide-react'
-import Link from 'next/link'
 import CalendarWidget from './CalendarWidget'
 
 export default async function DashboardPage() {
@@ -56,16 +55,6 @@ export default async function DashboardPage() {
       </div>
 
       <CalendarWidget works={calendarWorks || []} />
-      
-      <div className="pt-2">
-        <Link 
-          href="/works/new"
-          className="w-full bg-slate-900 text-white p-4 rounded-2xl shadow-sm hover:bg-slate-800 active:scale-95 transition-all flex items-center justify-center font-bold"
-        >
-          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"/></svg>
-          Add New Work
-        </Link>
-      </div>
     </div>
   )
 }

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, startOfWeek, endOfWeek, isToday } from 'date-fns'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import Link from 'next/link'
 
 type Work = {
@@ -106,9 +106,17 @@ export default function CalendarWidget({ works }: { works: Work[] }) {
 
       {/* Selected Date Works */}
       <div>
-        <h3 className="text-sm font-bold text-slate-800 mb-3 px-1">
-          {isToday(selectedDate) ? 'Today' : format(selectedDate, 'MMM d, yyyy')}
-        </h3>
+        <div className="flex justify-between items-center mb-3 px-1">
+          <h3 className="text-sm font-bold text-slate-800">
+            {isToday(selectedDate) ? 'Today' : format(selectedDate, 'MMM d, yyyy')}
+          </h3>
+          <Link 
+            href={`/works/new?date=${format(selectedDate, 'yyyy-MM-dd')}`}
+            className="bg-slate-900 text-white p-1.5 rounded-full shadow-sm hover:bg-slate-800 active:scale-95 transition-all"
+          >
+            <Plus className="w-4 h-4" />
+          </Link>
+        </div>
         
         {selectedDateWorks.length === 0 ? (
           <div className="bg-slate-50 border border-slate-200 border-dashed rounded-2xl p-6 text-center text-slate-500 text-sm">
