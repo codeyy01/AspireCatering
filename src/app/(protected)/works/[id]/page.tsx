@@ -7,6 +7,8 @@ import { IconButton } from '@/components/IconButton'
 import { updateWorkStatus, removeWorker } from './actions'
 import { notFound } from 'next/navigation'
 
+import EditableAssignmentAmount from './EditableAssignmentAmount'
+
 export default async function WorkDetailPage({
   params
 }: {
@@ -130,7 +132,10 @@ export default async function WorkDetailPage({
                     
                     <div className="flex items-center space-x-3 shrink-0">
                       <div className="text-right flex flex-col items-end">
-                        <span className="font-bold text-slate-900 text-sm">₹{Number(assignment.agreed_amount).toLocaleString()}</span>
+                        <EditableAssignmentAmount 
+                          assignmentId={assignment.id} 
+                          initialAmount={Number(assignment.agreed_amount || 0)} 
+                        />
                         <span className={`text-[9px] font-bold uppercase tracking-wider ${
                           assignment.paid_status === 'paid' ? 'text-emerald-500' :
                           assignment.paid_status === 'partial' ? 'text-amber-500' : 'text-red-400'

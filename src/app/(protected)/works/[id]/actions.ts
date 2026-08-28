@@ -25,3 +25,16 @@ export async function removeWorker(assignmentId: string, workId: string) {
 
   revalidatePath(`/works/${workId}`)
 }
+
+export async function updateAssignmentAmount(assignmentId: string, amount: number) {
+  const supabase = createClient()
+  
+  await supabase
+    .from('work_assignments')
+    .update({ agreed_amount: amount })
+    .eq('id', assignmentId)
+
+  // It is generally not strictly required to revalidate if the client component maintains its own state,
+  // but it's good practice so full refreshes are consistent.
+  revalidatePath('/works/[id]', 'page')
+}

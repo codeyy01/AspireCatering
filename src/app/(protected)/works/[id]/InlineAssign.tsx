@@ -74,10 +74,11 @@ export default function InlineAssign({ workId }: { workId: string }) {
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs font-semibold text-slate-500">Wage (₹) - optional</label>
+          <label className="text-xs font-semibold text-slate-500">Wage (₹)</label>
           <input 
             name="agreed_amount" 
             type="number" 
+            defaultValue="500"
             placeholder="e.g. 500" 
             className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900"
           />
