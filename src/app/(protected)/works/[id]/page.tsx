@@ -142,7 +142,9 @@ export default async function WorkDetailPage({
                     'use server'
                     await removeWorker(assignment.id, work.id)
                   }}>
-                    <IconButton icon={Trash2} variant="danger" />
+                    <IconButton variant="danger">
+                      <Trash2 className="w-4 h-4" />
+                    </IconButton>
                   </form>
                 </div>
               </div>
