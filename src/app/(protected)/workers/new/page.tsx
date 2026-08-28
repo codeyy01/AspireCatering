@@ -26,7 +26,7 @@ export default function NewWorkerPage() {
       } else {
         router.push('/workers')
       }
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred')
       setIsLoading(false)
     }
