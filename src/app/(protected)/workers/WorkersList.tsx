@@ -83,10 +83,6 @@ export default function WorkersList({ workers }: { workers: Worker[] }) {
           <div className="divide-y divide-slate-100">
             {filteredWorkers.map(worker => {
               const isSelected = selectedIds.has(worker.id)
-              // Assign a slight color tint based on the first letter of their name for a bit of flair
-              const colors = ['text-blue-600', 'text-emerald-600', 'text-rose-600', 'text-amber-600', 'text-indigo-600', 'text-violet-600']
-              const colorIndex = worker.name.charCodeAt(0) % colors.length
-              const roleColor = colors[colorIndex]
 
               return (
                 <Link 
@@ -105,11 +101,6 @@ export default function WorkersList({ workers }: { workers: Worker[] }) {
                     )}
                     <div className="flex-1 min-w-0 pr-4">
                       <h3 className="font-bold text-slate-900 truncate text-base">{worker.name}</h3>
-                      {worker.role && (
-                        <p className={`text-[10px] font-bold uppercase tracking-wider mt-0.5 truncate ${roleColor}`}>
-                          {worker.role}
-                        </p>
-                      )}
                     </div>
                   </div>
                   
