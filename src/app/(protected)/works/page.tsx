@@ -2,6 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { format } from 'date-fns'
 import Link from 'next/link'
 import { Plus, MapPin, IndianRupee } from 'lucide-react'
+import WorksList from './WorksList'
 
 export default async function WorksPage({
   searchParams,
@@ -63,63 +64,7 @@ export default async function WorksPage({
       </div>
 
       {/* Works List */}
-      <div className="space-y-3 mt-4">
-        {(!works || works.length === 0) ? (
-          <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center text-slate-500 text-sm">
-            No works found.
-          </div>
-        ) : (
-          works.map(work => {
-            const isFilled = (work.work_assignments?.[0]?.count || 0) >= (work.guest_count || 0)
-            let displayStatus = work.status
-            if (work.status !== 'completed' && work.status !== 'cancelled') {
-              displayStatus = isFilled ? 'Staffed' : 'Needs Staff'
-            }
-
-            return (
-              <Link key={work.id} href={`/works/${work.id}`} className="block bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:border-slate-300 transition-colors">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-bold text-slate-900 text-lg">{work.title}</h3>
-                  <span className={`text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide
-                    ${displayStatus === 'Needs Staff' ? 'bg-amber-100 text-amber-700' : ''}
-                    ${displayStatus === 'Staffed' ? 'bg-blue-100 text-blue-700' : ''}
-                    ${displayStatus === 'completed' ? 'bg-emerald-100 text-emerald-700' : ''}
-                    ${displayStatus === 'cancelled' ? 'bg-slate-100 text-slate-700' : ''}
-                  `}>
-                    {displayStatus}
-                  </span>
-                </div>
-              
-              <div className="flex flex-col space-y-1 mt-3">
-                <div className="flex items-center text-sm text-slate-600">
-                  <div className="w-5 flex justify-center mr-2"><MapPin className="w-4 h-4 text-slate-400" /></div>
-                  <span className="truncate">{work.venue || 'No venue'}</span>
-                </div>
-                
-                <div className="flex items-center text-sm text-slate-600">
-                  <div className="w-5 flex justify-center mr-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-slate-400"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                  </div>
-                  <span className="font-medium text-slate-700">
-                    Workers: {work.work_assignments?.[0]?.count || 0} / {work.guest_count || 0}
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-center mt-2 pt-2 border-t border-slate-100">
-                  <div className="text-sm font-medium text-slate-900">
-                    {format(new Date(work.event_date), 'MMM d, yyyy')}
-                  </div>
-                  <div className="flex items-center text-sm font-bold text-slate-900">
-                    <IndianRupee className="w-3 h-3 mr-0.5" />
-                    {Number(work.total_amount || 0).toLocaleString()}
-                  </div>
-                </div>
-              </div>
-            </Link>
-            )
-          })
-        )}
-      </div>
+      <WorksList works={works} />
     </div>
   )
 }
