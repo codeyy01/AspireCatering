@@ -4,10 +4,12 @@ import Link from 'next/link'
 import { ArrowLeft, MapPin, Phone, Users as UsersIcon, Trash2 } from 'lucide-react'
 import InlineAssign from './InlineAssign'
 import { IconButton } from '@/components/IconButton'
-import { updateWorkStatus, removeWorker } from './actions'
+import { removeWorker } from './actions'
 import { notFound } from 'next/navigation'
 
 import EditableAssignmentAmount from './EditableAssignmentAmount'
+import WorkStatusSelect from './WorkStatusSelect'
+import TogglePaidStatus from './TogglePaidStatus'
 
 export default async function WorkDetailPage({
   params
@@ -50,20 +52,7 @@ export default async function WorkDetailPage({
             <div className="text-2xl font-bold text-slate-900">₹{Number(work.total_amount || 0).toLocaleString()}</div>
             <div className="text-xs font-medium text-slate-500 uppercase tracking-wider mt-1">Total Amount</div>
           </div>
-          <form action={async () => {
-            'use server'
-            const nextStatus = work.status === 'upcoming' ? 'ongoing' : work.status === 'ongoing' ? 'completed' : 'upcoming'
-            await updateWorkStatus(work.id, nextStatus)
-          }}>
-            <button type="submit" className={`text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wide transition-colors
-              ${work.status === 'upcoming' ? 'bg-amber-100 text-amber-700 hover:bg-amber-200' : ''}
-              ${work.status === 'ongoing' ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : ''}
-              ${work.status === 'completed' ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : ''}
-              ${work.status === 'cancelled' ? 'bg-slate-100 text-slate-700' : ''}
-            `}>
-              {work.status} (Tap to change)
-            </button>
-          </form>
+          <WorkStatusSelect workId={work.id} initialStatus={work.status || 'upcoming'} />
         </div>
 
         <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
@@ -136,12 +125,10 @@ export default async function WorkDetailPage({
                           assignmentId={assignment.id} 
                           initialAmount={Number(assignment.agreed_amount || 0)} 
                         />
-                        <span className={`text-[9px] font-bold uppercase tracking-wider ${
-                          assignment.paid_status === 'paid' ? 'text-emerald-500' :
-                          assignment.paid_status === 'partial' ? 'text-amber-500' : 'text-red-400'
-                        }`}>
-                          {assignment.paid_status}
-                        </span>
+                        <TogglePaidStatus 
+                          assignmentId={assignment.id} 
+                          initialStatus={assignment.paid_status || 'unpaid'} 
+                        />
                       </div>
             
                       <form action={async () => {

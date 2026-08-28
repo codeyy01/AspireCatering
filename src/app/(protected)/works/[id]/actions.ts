@@ -38,3 +38,17 @@ export async function updateAssignmentAmount(assignmentId: string, amount: numbe
   // but it's good practice so full refreshes are consistent.
   revalidatePath('/works/[id]', 'page')
 }
+
+export async function togglePaidStatus(assignmentId: string, currentStatus: string) {
+  const supabase = createClient()
+  
+  const newStatus = currentStatus === 'paid' ? 'unpaid' : 'paid'
+  
+  await supabase
+    .from('work_assignments')
+    .update({ paid_status: newStatus })
+    .eq('id', assignmentId)
+
+  revalidatePath('/works/[id]', 'page')
+  return newStatus
+}
