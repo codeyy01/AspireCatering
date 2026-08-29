@@ -31,8 +31,16 @@ export default async function WorkDetailPage({
     .select('*, workers(id, name, role)')
     .eq('work_id', params.id)
 
-  const groupedAssignmentsMap = (assignments || []).reduce((acc: any, assignment: any) => {
+  type Assignment = typeof assignments extends (infer U)[] | null ? NonNullable<U> : never;
+  type GroupedAssignment = Assignment & {
+    headcount: number;
+    total_agreed_amount: number;
+    assignment_ids: string[];
+  };
+
+  const groupedAssignmentsMap = (assignments || []).reduce((acc: Record<string, GroupedAssignment>, assignment) => {
     const wid = assignment.worker_id
+    if (!wid) return acc
     if (!acc[wid]) {
       acc[wid] = {
         ...assignment,
@@ -54,7 +62,7 @@ export default async function WorkDetailPage({
     return acc
   }, {})
 
-  const groupedAssignments = Object.values(groupedAssignmentsMap) as any[]
+  const groupedAssignments = Object.values(groupedAssignmentsMap)
 
   return (
     <div className="space-y-4 pb-8 animate-in fade-in duration-300">
