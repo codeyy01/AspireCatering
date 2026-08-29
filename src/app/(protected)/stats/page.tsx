@@ -76,6 +76,17 @@ export default async function StatsPage() {
         <p className="font-semibold mb-1">More detailed charts coming soon!</p>
         <p className="text-blue-600/80">Future updates will include monthly breakdown charts and trend lines.</p>
       </div>
+
+      <div className="pt-4">
+        <a 
+          href="/api/export" 
+          download="catering_backup.csv"
+          className="w-full flex items-center justify-center bg-slate-900 text-white font-bold py-4 rounded-2xl shadow-md hover:bg-slate-800 active:scale-95 transition-all"
+        >
+          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          Download Backup (CSV)
+        </a>
+      </div>
     </div>
   )
 }
