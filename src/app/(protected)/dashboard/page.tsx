@@ -3,8 +3,14 @@ import { startOfMonth, endOfMonth, subMonths, addMonths } from 'date-fns'
 import { IndianRupee, Briefcase } from 'lucide-react'
 import CalendarWidget from './CalendarWidget'
 
+import { syncWorkStatuses } from '@/utils/syncStatus'
+
 export default async function DashboardPage() {
   const supabase = createClient()
+  
+  // Auto-sync statuses based on dates
+  await syncWorkStatuses()
+
   const now = new Date()
   const monthStart = startOfMonth(now)
   const monthEnd = endOfMonth(now)

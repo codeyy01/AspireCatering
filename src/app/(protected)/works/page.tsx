@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
+import { syncWorkStatuses } from '@/utils/syncStatus'
 import WorksList from './WorksList'
 
 export default async function WorksPage({
@@ -9,6 +10,9 @@ export default async function WorksPage({
   searchParams: { status?: string }
 }) {
   const supabase = createClient()
+  
+  await syncWorkStatuses()
+  
   const statusFilter = searchParams.status || 'upcoming'
   
   const { data: allWorks } = await supabase
