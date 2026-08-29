@@ -15,39 +15,43 @@ export async function updateWorkStatus(workId: string, status: string) {
   revalidatePath('/works')
 }
 
-export async function removeWorker(assignmentId: string, workId: string) {
+export async function removeWorker(assignmentId: string | string[], workId: string) {
   const supabase = createClient()
   
-  await supabase
-    .from('work_assignments')
-    .delete()
-    .eq('id', assignmentId)
+  if (Array.isArray(assignmentId)) {
+    await supabase.from('work_assignments').delete().in('id', assignmentId)
+  } else {
+    await supabase.from('work_assignments').delete().eq('id', assignmentId)
+  }
 
   revalidatePath(`/works/${workId}`)
 }
 
-export async function updateAssignmentAmount(assignmentId: string, amount: number) {
+export async function updateAssignmentAmount(assignmentId: string | string[], amount: number) {
   const supabase = createClient()
   
-  await supabase
-    .from('work_assignments')
-    .update({ agreed_amount: amount })
-    .eq('id', assignmentId)
+  if (Array.isArray(assignmentId)) {
+    // If it's a grouped headcount (e.g. 4 people), we store the per-person amount
+    // Wait, if amount is TOTAL amount entered by user (e.g. 4000), we need to store (4000 / 4) in each row
+    const perPerson = amount / assignmentId.length
+    await supabase.from('work_assignments').update({ agreed_amount: perPerson }).in('id', assignmentId)
+  } else {
+    await supabase.from('work_assignments').update({ agreed_amount: amount }).eq('id', assignmentId)
+  }
 
-  // It is generally not strictly required to revalidate if the client component maintains its own state,
-  // but it's good practice so full refreshes are consistent.
   revalidatePath('/works/[id]', 'page')
 }
 
-export async function togglePaidStatus(assignmentId: string, currentStatus: string) {
+export async function togglePaidStatus(assignmentId: string | string[], currentStatus: string) {
   const supabase = createClient()
   
   const newStatus = currentStatus === 'paid' ? 'unpaid' : 'paid'
   
-  await supabase
-    .from('work_assignments')
-    .update({ paid_status: newStatus })
-    .eq('id', assignmentId)
+  if (Array.isArray(assignmentId)) {
+    await supabase.from('work_assignments').update({ paid_status: newStatus }).in('id', assignmentId)
+  } else {
+    await supabase.from('work_assignments').update({ paid_status: newStatus }).eq('id', assignmentId)
+  }
 
   revalidatePath('/works/[id]', 'page')
   return newStatus

@@ -8,7 +8,7 @@ export default function TogglePaidStatus({
   assignmentId, 
   initialStatus 
 }: { 
-  assignmentId: string, 
+  assignmentId: string | string[], 
   initialStatus: string 
 }) {
   const [status, setStatus] = useState(initialStatus || 'unpaid')

@@ -31,6 +31,31 @@ export default async function WorkDetailPage({
     .select('*, workers(id, name, role)')
     .eq('work_id', params.id)
 
+  const groupedAssignmentsMap = (assignments || []).reduce((acc: any, assignment: any) => {
+    const wid = assignment.worker_id
+    if (!acc[wid]) {
+      acc[wid] = {
+        ...assignment,
+        headcount: 1,
+        total_agreed_amount: Number(assignment.agreed_amount || 0),
+        assignment_ids: [assignment.id]
+      }
+    } else {
+      acc[wid].headcount += 1
+      acc[wid].total_agreed_amount += Number(assignment.agreed_amount || 0)
+      acc[wid].assignment_ids.push(assignment.id)
+      // If any is unpaid, mark group as unpaid
+      if (assignment.paid_status === 'unpaid' || acc[wid].paid_status === 'unpaid') {
+        acc[wid].paid_status = 'unpaid'
+      } else if (assignment.paid_status === 'partial') {
+        acc[wid].paid_status = 'partial'
+      }
+    }
+    return acc
+  }, {})
+
+  const groupedAssignments = Object.values(groupedAssignmentsMap) as any[]
+
   return (
     <div className="space-y-4 pb-8 animate-in fade-in duration-300">
       <div className="flex items-center justify-between mb-4">
@@ -102,18 +127,23 @@ export default async function WorkDetailPage({
         </div>
 
         <div>
-          {(!assignments || assignments.length === 0) ? (
+          {(!groupedAssignments || groupedAssignments.length === 0) ? (
             <div className="bg-slate-100 rounded-2xl p-6 text-center text-slate-500 text-sm border border-slate-200 border-dashed">
               No workers assigned yet.
             </div>
           ) : (
             <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
               <div className="divide-y divide-slate-100">
-                {assignments.map(assignment => (
+                {groupedAssignments.map(assignment => (
                   <div key={assignment.id} className="p-3.5 flex items-center justify-between hover:bg-slate-50 transition-colors">
                     
                     <Link href={`/workers/${assignment.worker_id}`} className="flex-1 min-w-0 pr-3">
-                      <div className="font-bold text-slate-900 text-sm truncate">{assignment.workers?.name || 'Unknown Worker'}</div>
+                      <div className="font-bold text-slate-900 text-sm truncate">
+                        {assignment.workers?.name || 'Unknown Worker'}
+                        {assignment.headcount > 1 && (
+                          <span className="ml-1.5 text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded text-xs">({assignment.headcount})</span>
+                        )}
+                      </div>
                       {assignment.workers?.role && !['worker', 'other'].includes(assignment.workers.role.toLowerCase()) && (
                         <div className="text-[10px] text-slate-500 capitalize truncate mt-0.5">{assignment.workers.role}</div>
                       )}
@@ -122,18 +152,18 @@ export default async function WorkDetailPage({
                     <div className="flex items-center space-x-3 shrink-0">
                       <div className="text-right flex flex-col items-end">
                         <EditableAssignmentAmount 
-                          assignmentId={assignment.id} 
-                          initialAmount={Number(assignment.agreed_amount || 0)} 
+                          assignmentId={assignment.assignment_ids} 
+                          initialAmount={assignment.total_agreed_amount} 
                         />
                         <TogglePaidStatus 
-                          assignmentId={assignment.id} 
+                          assignmentId={assignment.assignment_ids} 
                           initialStatus={assignment.paid_status || 'unpaid'} 
                         />
                       </div>
             
                       <form action={async () => {
                         'use server'
-                        await removeWorker(assignment.id, work.id)
+                        await removeWorker(assignment.assignment_ids, work.id)
                       }}>
                         <IconButton variant="danger">
                           <Trash2 className="w-4 h-4" />

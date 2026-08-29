@@ -7,7 +7,7 @@ export default function EditableAssignmentAmount({
   assignmentId, 
   initialAmount 
 }: { 
-  assignmentId: string, 
+  assignmentId: string | string[], 
   initialAmount: number 
 }) {
   const [amount, setAmount] = useState(initialAmount.toString())
