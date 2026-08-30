@@ -10,6 +10,7 @@ import { notFound } from 'next/navigation'
 import EditableAssignmentAmount from './EditableAssignmentAmount'
 import WorkStatusSelect from './WorkStatusSelect'
 import TogglePaidStatus from './TogglePaidStatus'
+import ToggleClientPaymentStatus from './ToggleClientPaymentStatus'
 
 export default async function WorkDetailPage({
   params
@@ -119,6 +120,14 @@ export default async function WorkDetailPage({
             </div>
           )}
         </div>
+        
+        {/* Only show payment received button if it's completed */}
+        {work.status === 'completed' && (
+          <ToggleClientPaymentStatus 
+            workId={work.id} 
+            initialStatus={work.client_payment_status || 'unpaid'} 
+          />
+        )}
       </div>
 
       {/* Workers Section */}

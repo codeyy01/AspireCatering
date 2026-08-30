@@ -56,3 +56,24 @@ export async function togglePaidStatus(assignmentId: string | string[], currentS
   revalidatePath('/works/[id]', 'page')
   return newStatus
 }
+
+export async function toggleClientPaymentStatus(workId: string, currentStatus: string) {
+  const supabase = createClient()
+  const newStatus = currentStatus === 'paid' ? 'unpaid' : 'paid'
+
+  // Attempt to update the custom column.
+  // We will tell the user to run ALTER TABLE to add 'client_payment_status'
+  const { error } = await supabase
+    .from('works')
+    .update({ client_payment_status: newStatus })
+    .eq('id', workId)
+
+  if (error) {
+    console.error('Failed to update client payment status. Has the SQL migration been run?', error)
+    // Revert visually if there was a DB error
+    return currentStatus
+  }
+
+  revalidatePath('/works/[id]', 'page')
+  return newStatus
+}
