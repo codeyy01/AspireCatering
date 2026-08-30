@@ -32,7 +32,7 @@ export default async function DashboardPage() {
   
   const { data: calendarWorks } = await supabase
     .from('works')
-    .select('id, title, event_date, status, total_amount, guest_count, work_assignments(count)')
+    .select('id, title, event_date, status, total_amount, guest_count, client_payment_status, work_assignments(count)')
     .gte('event_date', calendarStart.toISOString())
     .lte('event_date', calendarEnd.toISOString())
     .not('status', 'eq', 'cancelled')

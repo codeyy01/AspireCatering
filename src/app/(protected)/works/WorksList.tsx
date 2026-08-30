@@ -14,6 +14,7 @@ type Work = {
   venue: string | null
   guest_count: number | null
   total_amount: number | null
+  client_payment_status?: string | null
   work_assignments: { count: number }[] | null
 }
 
@@ -114,6 +115,13 @@ export default function WorksList({ works }: { works: Work[] }) {
                       `}>
                         {displayStatus}
                       </span>
+                      {work.status === 'completed' && (
+                        <span className={`ml-2 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide shrink-0
+                          ${work.client_payment_status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}
+                        `}>
+                          {work.client_payment_status === 'paid' ? 'Payment Received' : 'Payment Pending'}
+                        </span>
+                      )}
                     </div>
                   
                     <div className="flex flex-col space-y-1 mt-3">

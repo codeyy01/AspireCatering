@@ -129,9 +129,14 @@ export default function CalendarWidget({ works }: { works: Work[] }) {
               if (work.status === 'ongoing') statusColor = 'text-amber-600 bg-amber-50'
               if (work.status === 'completed') statusColor = 'text-emerald-600 bg-emerald-50'
 
+              const isPaid = work.status === 'completed' && work.client_payment_status === 'paid'
+              const containerClass = isPaid 
+                ? 'bg-emerald-50 border border-emerald-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex justify-between items-center'
+                : 'bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex justify-between items-center'
+
               return (
                 <Link key={work.id} href={`/works/${work.id}`} className="block">
-                  <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex justify-between items-center">
+                  <div className={containerClass}>
                     <div>
                       <h4 className="font-bold text-slate-900">{work.title}</h4>
                       <div className="flex items-center space-x-2 mt-1.5">
