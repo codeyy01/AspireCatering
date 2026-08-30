@@ -1,10 +1,9 @@
 import { createClient } from '@/utils/supabase/server'
 import { format } from 'date-fns'
 import Link from 'next/link'
-import { ArrowLeft, Phone, Briefcase, CheckCircle2 } from 'lucide-react'
-import { markAsPaid } from './actions'
-import { SubmitButton } from '@/components/SubmitButton'
+import { ArrowLeft, Phone, Briefcase } from 'lucide-react'
 import { notFound } from 'next/navigation'
+import TogglePaidStatus from '../../works/[id]/TogglePaidStatus'
 
 export default async function WorkerDetailPage({
   params
@@ -123,8 +122,6 @@ export default async function WorkerDetailPage({
             </div>
           ) : (
             groupedAssignments.map(group => {
-              const owed = group.agreedAmount - group.amountPaid
-
               return (
                 <div key={group.workId} className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
                   <div className="flex justify-between items-start mb-2">
@@ -142,31 +139,13 @@ export default async function WorkerDetailPage({
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-bold text-slate-900">₹{group.agreedAmount.toLocaleString()}</div>
-                      <div className={`text-[10px] font-bold uppercase tracking-wider mt-1 ${
-                        group.paidStatus === 'paid' ? 'text-emerald-600' :
-                        group.paidStatus === 'partial' ? 'text-amber-600' : 'text-red-600'
-                      }`}>
-                        {group.paidStatus}
-                      </div>
+                      <div className="font-bold text-slate-900 mb-1">₹{group.agreedAmount.toLocaleString()}</div>
+                      <TogglePaidStatus 
+                        assignmentId={group.assignmentIds} 
+                        initialStatus={group.paidStatus} 
+                      />
                     </div>
                   </div>
-
-                  {owed > 0 && (
-                    <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
-                      <div className="text-sm font-medium text-red-600">
-                        Owes: ₹{owed.toLocaleString()}
-                      </div>
-                      <form action={async () => {
-                        'use server'
-                        await markAsPaid(group.assignmentIds, worker.id)
-                      }}>
-                        <SubmitButton className="flex items-center text-xs font-bold bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg active:scale-95 transition-transform disabled:opacity-50">
-                          <><CheckCircle2 className="w-4 h-4 mr-1" /> Pay Full</>
-                        </SubmitButton>
-                      </form>
-                    </div>
-                  )}
                 </div>
               )
             })
