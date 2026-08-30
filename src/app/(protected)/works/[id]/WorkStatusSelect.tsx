@@ -39,10 +39,10 @@ export default function WorkStatusSelect({
         className={`appearance-none outline-none text-xs font-bold px-4 py-2 rounded-full uppercase tracking-wide cursor-pointer transition-colors ${colors[status] || colors.upcoming} ${isLoading ? 'opacity-50' : ''}`}
         style={{ paddingRight: '2rem' }}
       >
-        <option value="upcoming">Upcoming</option>
-        <option value="ongoing">Ongoing</option>
-        <option value="completed">Completed</option>
-        <option value="cancelled">Cancelled</option>
+        <option value="upcoming" className="bg-white text-slate-900">Upcoming</option>
+        <option value="ongoing" className="bg-white text-slate-900">Ongoing</option>
+        <option value="completed" className="bg-white text-slate-900">Completed</option>
+        <option value="cancelled" className="bg-white text-slate-900">Cancelled</option>
       </select>
       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
         {isLoading ? (
