@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Trash2, CheckSquare, Square } from 'lucide-react'
+import { CheckSquare, Square } from 'lucide-react'
 import { removeWorker } from './actions'
 import EditableAssignmentAmount from './EditableAssignmentAmount'
 import TogglePaidStatus from './TogglePaidStatus'
@@ -11,7 +11,18 @@ export default function WorkAssignmentsList({
   groupedAssignments, 
   workId 
 }: { 
-  groupedAssignments: any[]
+  groupedAssignments: {
+    id: string
+    worker_id: string
+    headcount: number
+    total_agreed_amount: number
+    paid_status: string
+    assignment_ids: string[]
+    workers: {
+      name: string
+      role: string
+    }
+  }[]
   workId: string
 }) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
