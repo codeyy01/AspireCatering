@@ -35,6 +35,45 @@ export default async function WorkerDetailPage({
     totalPending += (Number(a.agreed_amount || 0) - Number(a.amount_paid || 0))
   })
 
+  type GroupedAssignment = {
+    workId: string
+    workTitle: string
+    workDate: string
+    assignmentIds: string[]
+    agreedAmount: number
+    amountPaid: number
+    headcount: number
+    paidStatus: string
+  }
+
+  const groupedAssignmentsMap = new Map<string, GroupedAssignment>()
+  assignments?.forEach(a => {
+    if (!a.works?.id) return
+    if (!groupedAssignmentsMap.has(a.works.id)) {
+      groupedAssignmentsMap.set(a.works.id, {
+        workId: a.works.id,
+        workTitle: a.works.title,
+        workDate: a.works.event_date,
+        assignmentIds: [a.id],
+        agreedAmount: Number(a.agreed_amount || 0),
+        amountPaid: Number(a.amount_paid || 0),
+        headcount: 1,
+        paidStatus: a.paid_status
+      })
+    } else {
+      const group = groupedAssignmentsMap.get(a.works.id)
+      group.assignmentIds.push(a.id)
+      group.agreedAmount += Number(a.agreed_amount || 0)
+      group.amountPaid += Number(a.amount_paid || 0)
+      group.headcount += 1
+      if (a.paid_status !== 'paid') {
+        group.paidStatus = 'unpaid' // Mark as unpaid if any is unpaid
+      }
+    }
+  })
+
+  const groupedAssignments = Array.from(groupedAssignmentsMap.values())
+
   return (
     <div className="space-y-4 pb-8 animate-in fade-in duration-300">
       <div className="flex items-center space-x-3 mb-4">
@@ -74,36 +113,41 @@ export default async function WorkerDetailPage({
       <div className="pt-2">
         <h2 className="text-lg font-bold text-slate-900 mb-3 flex items-center">
           <Briefcase className="w-5 h-5 mr-2" />
-          Work History ({assignments?.length || 0})
+          Work History ({groupedAssignments.length})
         </h2>
 
         <div className="space-y-3">
-          {(!assignments || assignments.length === 0) ? (
+          {(!groupedAssignments || groupedAssignments.length === 0) ? (
             <div className="bg-slate-100 rounded-2xl p-6 text-center text-slate-500 text-sm border border-slate-200 border-dashed">
               No works assigned yet.
             </div>
           ) : (
-            assignments.map(assignment => {
-              const workTitle = assignment.works?.title || 'Unknown Work'
-              const workDate = assignment.works?.event_date
-              const owed = Number(assignment.agreed_amount) - Number(assignment.amount_paid)
+            groupedAssignments.map(group => {
+              const owed = group.agreedAmount - group.amountPaid
 
               return (
-                <div key={assignment.id} className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+                <div key={group.workId} className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
                   <div className="flex justify-between items-start mb-2">
                     <div>
-                      <Link href={`/works/${assignment.works?.id}`} className="font-bold text-slate-900 hover:underline">{workTitle}</Link>
+                      <Link href={`/works/${group.workId}`} className="font-bold text-slate-900 hover:underline flex items-center">
+                        {group.workTitle}
+                        {group.headcount > 1 && (
+                          <span className="ml-2 text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider">
+                            ({group.headcount} Workers)
+                          </span>
+                        )}
+                      </Link>
                       <div className="text-xs text-slate-500 mt-0.5">
-                        {workDate ? format(new Date(workDate), 'MMM d, yyyy') : 'No date'}
+                        {group.workDate ? format(new Date(group.workDate), 'MMM d, yyyy') : 'No date'}
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-bold text-slate-900">₹{Number(assignment.agreed_amount).toLocaleString()}</div>
+                      <div className="font-bold text-slate-900">₹{group.agreedAmount.toLocaleString()}</div>
                       <div className={`text-[10px] font-bold uppercase tracking-wider mt-1 ${
-                        assignment.paid_status === 'paid' ? 'text-emerald-600' :
-                        assignment.paid_status === 'partial' ? 'text-amber-600' : 'text-red-600'
+                        group.paidStatus === 'paid' ? 'text-emerald-600' :
+                        group.paidStatus === 'partial' ? 'text-amber-600' : 'text-red-600'
                       }`}>
-                        {assignment.paid_status}
+                        {group.paidStatus}
                       </div>
                     </div>
                   </div>
@@ -115,7 +159,7 @@ export default async function WorkerDetailPage({
                       </div>
                       <form action={async () => {
                         'use server'
-                        await markAsPaid(assignment.id, worker.id, owed)
+                        await markAsPaid(group.assignmentIds, worker.id)
                       }}>
                         <SubmitButton className="flex items-center text-xs font-bold bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg active:scale-95 transition-transform disabled:opacity-50">
                           <><CheckCircle2 className="w-4 h-4 mr-1" /> Pay Full</>

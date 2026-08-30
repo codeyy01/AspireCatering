@@ -3,33 +3,29 @@
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export async function markAsPaid(assignmentId: string, workerId: string, amount: number) {
+export async function markAsPaid(assignmentIds: string | string[], workerId: string) {
   const supabase = createClient()
+  const ids = Array.isArray(assignmentIds) ? assignmentIds : [assignmentIds]
   
-  const { data: assignment } = await supabase
+  const { data: assignments } = await supabase
     .from('work_assignments')
-    .select('agreed_amount, amount_paid')
-    .eq('id', assignmentId)
-    .single()
+    .select('id, agreed_amount')
+    .in('id', ids)
 
-  if (!assignment) return
+  if (!assignments) return
 
-  const newPaidAmount = Number(assignment.amount_paid) + amount
-  const agreedAmount = Number(assignment.agreed_amount)
+  const now = new Date().toISOString()
   
-  let newStatus = 'partial'
-  if (newPaidAmount >= agreedAmount) {
-    newStatus = 'paid'
-  }
-
-  await supabase
-    .from('work_assignments')
-    .update({ 
-      amount_paid: newPaidAmount,
-      paid_status: newStatus,
-      paid_date: newStatus === 'paid' ? new Date().toISOString() : null
-    })
-    .eq('id', assignmentId)
+  await Promise.all(assignments.map(a => 
+    supabase
+      .from('work_assignments')
+      .update({ 
+        amount_paid: a.agreed_amount,
+        paid_status: 'paid',
+        paid_date: now
+      })
+      .eq('id', a.id)
+  ))
 
   revalidatePath(`/workers/${workerId}`)
 }
