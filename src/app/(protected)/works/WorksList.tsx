@@ -111,6 +111,16 @@ export default function WorksList({ works }: { works: Work[] }) {
             }
 
             const isSelected = selectedIds.has(work.id)
+            const isPaid = work.status === 'completed' && work.client_payment_status === 'paid'
+            
+            let containerClass = 'block border rounded-2xl p-4 shadow-sm transition-all '
+            if (isSelected) {
+              containerClass += 'border-slate-900 ring-1 ring-slate-900 bg-white'
+            } else if (isPaid) {
+              containerClass += 'bg-emerald-50 border-emerald-200 hover:border-emerald-300'
+            } else {
+              containerClass += 'bg-white border-slate-200 hover:border-slate-300'
+            }
 
             return (
               <Link 
@@ -121,9 +131,7 @@ export default function WorksList({ works }: { works: Work[] }) {
                     toggleSelect(e, work.id)
                   }
                 }}
-                className={`block bg-white border rounded-2xl p-4 shadow-sm transition-all ${
-                  isSelected ? 'border-slate-900 ring-1 ring-slate-900' : 'border-slate-200 hover:border-slate-300'
-                }`}
+                className={containerClass}
               >
                 <div className="flex items-start">
                   {selectionMode && (
