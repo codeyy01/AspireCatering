@@ -12,6 +12,7 @@ type Work = {
   status: string
   total_amount?: number
   guest_count?: number
+  client_payment_status?: string | null
   work_assignments?: { count: number }[]
 }
 
