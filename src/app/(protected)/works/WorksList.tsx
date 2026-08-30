@@ -23,6 +23,14 @@ export default function WorksList({ works }: { works: Work[] }) {
   const [isDeleting, setIsDeleting] = useState(false)
   const [selectionMode, setSelectionMode] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
+  const [paymentFilter, setPaymentFilter] = useState<'all' | 'paid' | 'pending'>('all')
+
+  const filteredWorks = works.filter(w => {
+    if (paymentFilter === 'all') return true
+    if (paymentFilter === 'paid') return w.client_payment_status === 'paid'
+    if (paymentFilter === 'pending') return w.client_payment_status !== 'paid'
+    return true
+  })
 
   const toggleSelect = (e: React.MouseEvent, id: string) => {
     e.preventDefault()
@@ -54,24 +62,48 @@ export default function WorksList({ works }: { works: Work[] }) {
   return (
     <>
       <div className="flex justify-between items-center mt-6 mb-2">
-        <h2 className="text-lg font-bold text-slate-900">All Works ({works.length})</h2>
-        {works.length > 0 && (
+        <h2 className="text-lg font-bold text-slate-900">All Works ({filteredWorks.length})</h2>
+        {filteredWorks.length > 0 && (
           <button 
             onClick={toggleSelectionMode}
             className="text-sm font-medium text-slate-600 hover:text-slate-900 px-3 py-1 bg-slate-100 rounded-lg transition-colors"
           >
-            {selectionMode ? 'Cancel' : 'Select Multiple'}
+            {selectionMode ? 'Cancel' : 'Select'}
           </button>
         )}
       </div>
+      
+      {/* Sub-filter for completed works */}
+      {works.length > 0 && works.every(w => w.status === 'completed') && (
+        <div className="flex space-x-2 mb-4">
+          <button 
+            onClick={() => setPaymentFilter('all')}
+            className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-colors ${paymentFilter === 'all' ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+          >
+            All
+          </button>
+          <button 
+            onClick={() => setPaymentFilter('paid')}
+            className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-colors ${paymentFilter === 'paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+          >
+            Payment Received
+          </button>
+          <button 
+            onClick={() => setPaymentFilter('pending')}
+            className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-colors ${paymentFilter === 'pending' ? 'bg-red-100 text-red-800' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+          >
+            Payment Pending
+          </button>
+        </div>
+      )}
 
       <div className="space-y-3">
-        {(!works || works.length === 0) ? (
+        {(!filteredWorks || filteredWorks.length === 0) ? (
           <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center text-slate-500 text-sm">
             No works found.
           </div>
         ) : (
-          works.map(work => {
+          filteredWorks.map(work => {
             const isFilled = (work.work_assignments?.[0]?.count || 0) >= (work.guest_count || 0)
             let displayStatus = work.status
             if (work.status !== 'completed' && work.status !== 'cancelled') {
@@ -115,13 +147,6 @@ export default function WorksList({ works }: { works: Work[] }) {
                       `}>
                         {displayStatus}
                       </span>
-                      {work.status === 'completed' && (
-                        <span className={`ml-2 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide shrink-0
-                          ${work.client_payment_status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}
-                        `}>
-                          {work.client_payment_status === 'paid' ? 'Payment Received' : 'Payment Pending'}
-                        </span>
-                      )}
                     </div>
                   
                     <div className="flex flex-col space-y-1 mt-3">
