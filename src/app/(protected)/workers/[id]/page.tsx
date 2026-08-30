@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ArrowLeft, Phone, Briefcase } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import TogglePaidStatus from '../../works/[id]/TogglePaidStatus'
+import EditableAssignmentAmount from '../../works/[id]/EditableAssignmentAmount'
 
 export default async function WorkerDetailPage({
   params
@@ -139,7 +140,12 @@ export default async function WorkerDetailPage({
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-bold text-slate-900 mb-1">₹{group.agreedAmount.toLocaleString()}</div>
+                      <div className="mb-1 flex justify-end">
+                        <EditableAssignmentAmount 
+                          assignmentId={group.assignmentIds} 
+                          initialAmount={group.agreedAmount} 
+                        />
+                      </div>
                       <TogglePaidStatus 
                         assignmentId={group.assignmentIds} 
                         initialStatus={group.paidStatus} 
