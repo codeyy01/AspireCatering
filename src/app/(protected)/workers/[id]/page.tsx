@@ -61,7 +61,7 @@ export default async function WorkerDetailPage({
         paidStatus: a.paid_status
       })
     } else {
-      const group = groupedAssignmentsMap.get(a.works.id)
+      const group = groupedAssignmentsMap.get(a.works.id)!
       group.assignmentIds.push(a.id)
       group.agreedAmount += Number(a.agreed_amount || 0)
       group.amountPaid += Number(a.amount_paid || 0)
