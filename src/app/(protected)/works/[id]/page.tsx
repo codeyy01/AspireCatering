@@ -140,7 +140,7 @@ export default async function WorkDetailPage({
           <InlineAssign workId={work.id} />
         </div>
 
-        <WorkAssignmentsList groupedAssignments={groupedAssignments} workId={work.id} />
+        <WorkAssignmentsList groupedAssignments={groupedAssignments} />
       </div>
     </div>
   )

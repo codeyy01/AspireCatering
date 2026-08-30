@@ -8,8 +8,7 @@ import EditableAssignmentAmount from './EditableAssignmentAmount'
 import TogglePaidStatus from './TogglePaidStatus'
 
 export default function WorkAssignmentsList({ 
-  groupedAssignments, 
-  workId 
+  groupedAssignments
 }: { 
   groupedAssignments: {
     id: string
@@ -23,7 +22,6 @@ export default function WorkAssignmentsList({
       role: string
     }
   }[]
-  workId: string
 }) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [selectionMode, setSelectionMode] = useState(false)
@@ -75,7 +73,7 @@ export default function WorkAssignmentsList({
       }
     })
     
-    await removeWorker(allIdsToRemove, workId)
+    await removeWorker(allIdsToRemove)
     setSelectedIds(new Set())
     setSelectionMode(false)
     setIsDeleting(false)

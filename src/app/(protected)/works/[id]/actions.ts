@@ -11,11 +11,11 @@ export async function updateWorkStatus(workId: string, status: string) {
     .update({ status })
     .eq('id', workId)
 
-  revalidatePath(`/works/${workId}`)
-  revalidatePath('/works')
+  revalidatePath('/', 'layout')
+  revalidatePath('/', 'layout')
 }
 
-export async function removeWorker(assignmentId: string | string[], workId: string) {
+export async function removeWorker(assignmentId: string | string[]) {
   const supabase = createClient()
   
   if (Array.isArray(assignmentId)) {
@@ -24,36 +24,66 @@ export async function removeWorker(assignmentId: string | string[], workId: stri
     await supabase.from('work_assignments').delete().eq('id', assignmentId)
   }
 
-  revalidatePath(`/works/${workId}`)
+  revalidatePath('/', 'layout')
 }
 
 export async function updateAssignmentAmount(assignmentId: string | string[], amount: number) {
   const supabase = createClient()
-  
-  if (Array.isArray(assignmentId)) {
-    // If it's a grouped headcount (e.g. 4 people), we store the per-person amount
-    // Wait, if amount is TOTAL amount entered by user (e.g. 4000), we need to store (4000 / 4) in each row
-    const perPerson = amount / assignmentId.length
-    await supabase.from('work_assignments').update({ agreed_amount: perPerson }).in('id', assignmentId)
-  } else {
-    await supabase.from('work_assignments').update({ agreed_amount: amount }).eq('id', assignmentId)
-  }
+  const ids = Array.isArray(assignmentId) ? assignmentId : [assignmentId]
+  const perPerson = amount / ids.length
 
-  revalidatePath('/works/[id]', 'page')
+  const { data: assignments } = await supabase
+    .from('work_assignments')
+    .select('id, amount_paid')
+    .in('id', ids)
+
+  if (!assignments) return
+
+  await Promise.all(assignments.map(a => {
+    let newStatus = 'unpaid'
+    const paid = Number(a.amount_paid || 0)
+    if (paid > 0) {
+      if (paid >= perPerson) newStatus = 'paid'
+      else newStatus = 'partial'
+    }
+
+    return supabase
+      .from('work_assignments')
+      .update({ 
+        agreed_amount: perPerson,
+        paid_status: newStatus,
+        paid_date: newStatus === 'paid' ? new Date().toISOString() : null
+      })
+      .eq('id', a.id)
+  }))
+
+  revalidatePath('/', 'layout')
 }
 
 export async function togglePaidStatus(assignmentId: string | string[], currentStatus: string) {
   const supabase = createClient()
-  
   const newStatus = currentStatus === 'paid' ? 'unpaid' : 'paid'
-  
-  if (Array.isArray(assignmentId)) {
-    await supabase.from('work_assignments').update({ paid_status: newStatus }).in('id', assignmentId)
-  } else {
-    await supabase.from('work_assignments').update({ paid_status: newStatus }).eq('id', assignmentId)
-  }
+  const ids = Array.isArray(assignmentId) ? assignmentId : [assignmentId]
 
-  revalidatePath('/works/[id]', 'page')
+  const { data: assignments } = await supabase
+    .from('work_assignments')
+    .select('id, agreed_amount')
+    .in('id', ids)
+
+  if (!assignments) return currentStatus
+
+  await Promise.all(assignments.map(a => 
+    supabase
+      .from('work_assignments')
+      .update({ 
+        paid_status: newStatus,
+        amount_paid: newStatus === 'paid' ? a.agreed_amount : 0,
+        paid_date: newStatus === 'paid' ? new Date().toISOString() : null
+      })
+      .eq('id', a.id)
+  ))
+
+  revalidatePath('/', 'layout')
   return newStatus
 }
 
@@ -74,6 +104,6 @@ export async function toggleClientPaymentStatus(workId: string, currentStatus: s
     return currentStatus
   }
 
-  revalidatePath('/works/[id]', 'page')
+  revalidatePath('/', 'layout')
   return newStatus
 }
