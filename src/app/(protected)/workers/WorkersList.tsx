@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import Link from 'next/link'
 import { Trash2, Loader2, CheckSquare, Square } from 'lucide-react'
 import { deleteWorkers } from './actions'
@@ -18,6 +18,32 @@ export default function WorkersList({ workers }: { workers: Worker[] }) {
   const [selectionMode, setSelectionMode] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  
+  const pressTimer = useRef<NodeJS.Timeout | null>(null)
+  const wasLongPress = useRef(false)
+
+  const handlePressStart = (id: string) => {
+    wasLongPress.current = false
+    pressTimer.current = setTimeout(() => {
+      wasLongPress.current = true
+      setSelectionMode(true)
+      setSelectedIds(prev => {
+        const newSet = new Set(prev)
+        newSet.add(id)
+        return newSet
+      })
+      if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+        window.navigator.vibrate(50)
+      }
+    }, 400)
+  }
+
+  const cancelPress = () => {
+    if (pressTimer.current) {
+      clearTimeout(pressTimer.current)
+      pressTimer.current = null
+    }
+  }
 
   const toggleSelect = (e: React.MouseEvent, id: string) => {
     e.preventDefault()
@@ -88,8 +114,26 @@ export default function WorkersList({ workers }: { workers: Worker[] }) {
                 <Link 
                   key={worker.id} 
                   href={selectionMode ? '#' : `/workers/${worker.id}`} 
-                  onClick={(e) => selectionMode && toggleSelect(e, worker.id)}
-                  className={`flex items-center justify-between p-4 transition-colors ${
+                  onTouchStart={() => handlePressStart(worker.id)}
+                  onTouchEnd={cancelPress}
+                  onTouchMove={cancelPress}
+                  onMouseDown={() => handlePressStart(worker.id)}
+                  onMouseUp={cancelPress}
+                  onMouseLeave={cancelPress}
+                  onContextMenu={(e) => {
+                    if (selectionMode || pressTimer.current) e.preventDefault()
+                  }}
+                  onClick={(e) => {
+                    if (wasLongPress.current) {
+                      e.preventDefault()
+                      return
+                    }
+                    if (selectionMode) {
+                      e.preventDefault()
+                      toggleSelect(e, worker.id)
+                    }
+                  }}
+                  className={`flex items-center justify-between p-4 transition-colors select-none ${
                     isSelected ? 'bg-blue-50/50' : 'hover:bg-slate-50'
                   }`}
                 >

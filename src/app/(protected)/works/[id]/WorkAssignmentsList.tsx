@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import Link from 'next/link'
 import { CheckSquare, Square } from 'lucide-react'
 import { removeWorker } from './actions'
@@ -28,6 +28,32 @@ export default function WorkAssignmentsList({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [selectionMode, setSelectionMode] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  
+  const pressTimer = useRef<NodeJS.Timeout | null>(null)
+  const wasLongPress = useRef(false)
+
+  const handlePressStart = (id: string) => {
+    wasLongPress.current = false
+    pressTimer.current = setTimeout(() => {
+      wasLongPress.current = true
+      setSelectionMode(true)
+      setSelectedIds(prev => {
+        const newSet = new Set(prev)
+        newSet.add(id)
+        return newSet
+      })
+      if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+        window.navigator.vibrate(50)
+      }
+    }, 400)
+  }
+
+  const cancelPress = () => {
+    if (pressTimer.current) {
+      clearTimeout(pressTimer.current)
+      pressTimer.current = null
+    }
+  }
 
   const toggleSelect = (e: React.MouseEvent, id: string) => {
     e.preventDefault()
@@ -101,7 +127,26 @@ export default function WorkAssignmentsList({
                       )}
                     </div>
                   )}
-                  <Link href={selectionMode ? '#' : `/workers/${assignment.worker_id}`} onClick={(e) => { if(selectionMode) toggleSelect(e, assignment.id) }} className="flex-1 min-w-0">
+                  <Link 
+                    href={selectionMode ? '#' : `/workers/${assignment.worker_id}`} 
+                    onTouchStart={() => handlePressStart(assignment.id)}
+                    onTouchEnd={cancelPress}
+                    onTouchMove={cancelPress}
+                    onMouseDown={() => handlePressStart(assignment.id)}
+                    onMouseUp={cancelPress}
+                    onMouseLeave={cancelPress}
+                    onContextMenu={(e) => {
+                      if (selectionMode || pressTimer.current) e.preventDefault()
+                    }}
+                    onClick={(e) => {
+                      if (wasLongPress.current) {
+                        e.preventDefault()
+                        return
+                      }
+                      if (selectionMode) toggleSelect(e, assignment.id)
+                    }} 
+                    className="flex-1 min-w-0 select-none"
+                  >
                     <div className="font-bold text-slate-900 text-sm truncate">
                       {assignment.workers?.name || 'Unknown Worker'}
                       {assignment.headcount > 1 && (

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { MapPin, IndianRupee, Trash2, Loader2, CheckSquare, Square } from 'lucide-react'
@@ -24,6 +24,32 @@ export default function WorksList({ works }: { works: Work[] }) {
   const [selectionMode, setSelectionMode] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [paymentFilter, setPaymentFilter] = useState<'all' | 'paid' | 'pending'>('all')
+
+  const pressTimer = useRef<NodeJS.Timeout | null>(null)
+  const wasLongPress = useRef(false)
+
+  const handlePressStart = (id: string) => {
+    wasLongPress.current = false
+    pressTimer.current = setTimeout(() => {
+      wasLongPress.current = true
+      setSelectionMode(true)
+      setSelectedIds(prev => {
+        const newSet = new Set(prev)
+        newSet.add(id)
+        return newSet
+      })
+      if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+        window.navigator.vibrate(50)
+      }
+    }, 400)
+  }
+
+  const cancelPress = () => {
+    if (pressTimer.current) {
+      clearTimeout(pressTimer.current)
+      pressTimer.current = null
+    }
+  }
 
   const filteredWorks = works.filter(w => {
     if (paymentFilter === 'all') return true
@@ -113,7 +139,7 @@ export default function WorksList({ works }: { works: Work[] }) {
             const isSelected = selectedIds.has(work.id)
             const isPaid = work.status === 'completed' && work.client_payment_status === 'paid'
             
-            let containerClass = 'block border rounded-2xl p-4 shadow-sm transition-all '
+            let containerClass = 'block border rounded-2xl p-4 shadow-sm transition-all select-none '
             if (isSelected) {
               containerClass += 'border-slate-900 ring-1 ring-slate-900 bg-white'
             } else if (isPaid) {
@@ -126,8 +152,22 @@ export default function WorksList({ works }: { works: Work[] }) {
               <Link 
                 key={work.id} 
                 href={selectionMode ? '#' : `/works/${work.id}`} 
+                onTouchStart={() => handlePressStart(work.id)}
+                onTouchEnd={cancelPress}
+                onTouchMove={cancelPress}
+                onMouseDown={() => handlePressStart(work.id)}
+                onMouseUp={cancelPress}
+                onMouseLeave={cancelPress}
+                onContextMenu={(e) => {
+                  if (selectionMode || pressTimer.current) e.preventDefault()
+                }}
                 onClick={(e) => {
+                  if (wasLongPress.current) {
+                    e.preventDefault()
+                    return
+                  }
                   if (selectionMode) {
+                    e.preventDefault()
                     toggleSelect(e, work.id)
                   }
                 }}
