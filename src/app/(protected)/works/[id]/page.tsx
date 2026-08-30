@@ -1,16 +1,13 @@
 import { createClient } from '@/utils/supabase/server'
 import { format } from 'date-fns'
 import Link from 'next/link'
-import { ArrowLeft, MapPin, Phone, Users as UsersIcon, Trash2 } from 'lucide-react'
+import { ArrowLeft, MapPin, Phone, Users as UsersIcon } from 'lucide-react'
 import InlineAssign from './InlineAssign'
-import { IconButton } from '@/components/IconButton'
-import { removeWorker } from './actions'
 import { notFound } from 'next/navigation'
 
-import EditableAssignmentAmount from './EditableAssignmentAmount'
 import WorkStatusSelect from './WorkStatusSelect'
-import TogglePaidStatus from './TogglePaidStatus'
 import ToggleClientPaymentStatus from './ToggleClientPaymentStatus'
+import WorkAssignmentsList from './WorkAssignmentsList'
 
 export default async function WorkDetailPage({
   params
@@ -143,57 +140,7 @@ export default async function WorkDetailPage({
           <InlineAssign workId={work.id} />
         </div>
 
-        <div>
-          {(!groupedAssignments || groupedAssignments.length === 0) ? (
-            <div className="bg-slate-100 rounded-2xl p-6 text-center text-slate-500 text-sm border border-slate-200 border-dashed">
-              No workers assigned yet.
-            </div>
-          ) : (
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-              <div className="divide-y divide-slate-100">
-                {groupedAssignments.map(assignment => (
-                  <div key={assignment.id} className="p-3.5 flex items-center justify-between hover:bg-slate-50 transition-colors">
-                    
-                    <Link href={`/workers/${assignment.worker_id}`} className="flex-1 min-w-0 pr-3">
-                      <div className="font-bold text-slate-900 text-sm truncate">
-                        {assignment.workers?.name || 'Unknown Worker'}
-                        {assignment.headcount > 1 && (
-                          <span className="ml-1.5 text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded text-xs">({assignment.headcount})</span>
-                        )}
-                      </div>
-                      {assignment.workers?.role && !['worker', 'other'].includes(assignment.workers.role.toLowerCase()) && (
-                        <div className="text-[10px] text-slate-500 capitalize truncate mt-0.5">{assignment.workers.role}</div>
-                      )}
-                    </Link>
-                    
-                    <div className="flex items-center space-x-3 shrink-0">
-                      <div className="text-right flex flex-col items-end">
-                        <EditableAssignmentAmount 
-                          assignmentId={assignment.assignment_ids} 
-                          initialAmount={assignment.total_agreed_amount} 
-                        />
-                        <TogglePaidStatus 
-                          assignmentId={assignment.assignment_ids} 
-                          initialStatus={assignment.paid_status || 'unpaid'} 
-                        />
-                      </div>
-            
-                      <form action={async () => {
-                        'use server'
-                        await removeWorker(assignment.assignment_ids, work.id)
-                      }}>
-                        <IconButton variant="danger">
-                          <Trash2 className="w-4 h-4" />
-                        </IconButton>
-                      </form>
-                    </div>
-
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+        <WorkAssignmentsList groupedAssignments={groupedAssignments} workId={work.id} />
       </div>
     </div>
   )
