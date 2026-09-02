@@ -6,6 +6,7 @@ import { CheckSquare, Square, Loader2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { markAsPaid } from '../../works/[id]/actions'
 import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 import TogglePaidStatus from '../../works/[id]/TogglePaidStatus'
 import EditableAssignmentAmount from '../../works/[id]/EditableAssignmentAmount'
 
@@ -21,6 +22,7 @@ type GroupedAssignment = {
 }
 
 export default function WorkerHistoryList({ assignments }: { assignments: GroupedAssignment[] }) {
+  const router = useRouter()
   const [selectedWorkIds, setSelectedWorkIds] = useState<Set<string>>(new Set())
   const [selectionMode, setSelectionMode] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
@@ -80,6 +82,7 @@ export default function WorkerHistoryList({ assignments }: { assignments: Groupe
     setSelectedWorkIds(new Set())
     setSelectionMode(false)
     setIsUpdating(false)
+    router.refresh()
   }
 
   const hasUnpaid = assignments.some(a => a.paidStatus !== 'paid')
