@@ -28,7 +28,9 @@ export default function WorkerHistoryList({ assignments }: { assignments: Groupe
   const pressTimer = useRef<NodeJS.Timeout | null>(null)
   const wasLongPress = useRef(false)
 
-  const handlePressStart = (id: string) => {
+  const handlePressStart = (id: string, paidStatus: string) => {
+    if (paidStatus === 'paid') return
+    
     wasLongPress.current = false
     pressTimer.current = setTimeout(() => {
       wasLongPress.current = true
@@ -80,9 +82,11 @@ export default function WorkerHistoryList({ assignments }: { assignments: Groupe
     setIsUpdating(false)
   }
 
+  const hasUnpaid = assignments.some(a => a.paidStatus !== 'paid')
+
   return (
     <>
-      {assignments.length > 0 && (
+      {hasUnpaid && (
         <div className="flex justify-end mb-3">
           <button 
             onClick={toggleSelectionMode} 
@@ -101,14 +105,15 @@ export default function WorkerHistoryList({ assignments }: { assignments: Groupe
         ) : (
           assignments.map(group => {
             const isSelected = selectedWorkIds.has(group.workId)
+            const isPaid = group.paidStatus === 'paid'
             
             return (
               <div 
                 key={group.workId} 
-                onTouchStart={() => handlePressStart(group.workId)}
+                onTouchStart={() => handlePressStart(group.workId, group.paidStatus)}
                 onTouchEnd={cancelPress}
                 onTouchMove={cancelPress}
-                onMouseDown={() => handlePressStart(group.workId)}
+                onMouseDown={() => handlePressStart(group.workId, group.paidStatus)}
                 onMouseUp={cancelPress}
                 onMouseLeave={cancelPress}
                 onContextMenu={(e) => {
@@ -119,19 +124,24 @@ export default function WorkerHistoryList({ assignments }: { assignments: Groupe
                     e.preventDefault()
                     return
                   }
-                  if (selectionMode) {
+                  if (selectionMode && !isPaid) {
                     e.preventDefault()
                     toggleSelect(e, group.workId)
                   }
                 }}
                 className={`bg-white border transition-colors rounded-2xl p-4 shadow-sm select-none cursor-pointer ${
                   isSelected ? 'border-blue-400 bg-blue-50/50' : 'border-slate-200 hover:border-slate-300'
-                }`}
+                } ${selectionMode && isPaid ? 'opacity-50' : ''}`}
               >
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex items-start">
                     {selectionMode && (
-                      <div className="shrink-0 mr-3 mt-1 text-slate-400" onClick={(e) => toggleSelect(e, group.workId)}>
+                      <div 
+                        className={`shrink-0 mr-3 mt-1 ${isPaid ? 'text-slate-200' : 'text-slate-400'}`} 
+                        onClick={(e) => {
+                          if (!isPaid) toggleSelect(e, group.workId)
+                        }}
+                      >
                         {isSelected ? <CheckSquare className="w-5 h-5 text-blue-600" /> : <Square className="w-5 h-5" />}
                       </div>
                     )}
