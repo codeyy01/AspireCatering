@@ -8,6 +8,7 @@ import { notFound } from 'next/navigation'
 import WorkStatusSelect from './WorkStatusSelect'
 import ToggleClientPaymentStatus from './ToggleClientPaymentStatus'
 import WorkAssignmentsList from './WorkAssignmentsList'
+import DeleteWorkButton from './DeleteWorkButton'
 
 export default async function WorkDetailPage({
   params
@@ -71,9 +72,12 @@ export default async function WorkDetailPage({
           </Link>
           <h1 className="text-xl font-bold text-slate-900 truncate max-w-[200px]">{work.title}</h1>
         </div>
-        <Link href={`/works/${work.id}/edit`} className="text-sm font-medium text-slate-600 bg-white border border-slate-200 px-3 py-1.5 rounded-lg active:scale-95 transition-transform">
-          Edit
-        </Link>
+        <div className="flex items-center space-x-2">
+          <DeleteWorkButton workId={work.id} />
+          <Link href={`/works/${work.id}/edit`} className="text-sm font-medium text-slate-600 bg-white border border-slate-200 px-3 py-1.5 rounded-lg active:scale-95 transition-transform">
+            Edit
+          </Link>
+        </div>
       </div>
 
       {/* Work Details Card */}

@@ -102,7 +102,7 @@ export default function EditWorkPage({ params }: { params: { id: string } }) {
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Venue *</label>
+          <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Location *</label>
           <input required name="venue" defaultValue={work?.venue || ''} type="text" className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900" />
         </div>
 
