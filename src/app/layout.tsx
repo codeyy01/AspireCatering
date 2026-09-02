@@ -17,6 +17,10 @@ export const metadata: Metadata = {
   },
   icons: {
     apple: "/icon-192x192.png"
+  },
+  robots: {
+    index: false,
+    follow: false,
   }
 };
 
