@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { togglePaidStatus } from './actions'
 import { Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 export default function TogglePaidStatus({ 
   assignmentId, 
@@ -18,6 +19,7 @@ export default function TogglePaidStatus({
     setIsLoading(true)
     const newStatus = await togglePaidStatus(assignmentId, status)
     setStatus(newStatus)
+    toast.success(`Payment marked as ${newStatus.toUpperCase()}`)
     setIsLoading(false)
   }
 

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { updateAssignmentAmount } from './actions'
+import { toast } from 'sonner'
 
 export default function EditableAssignmentAmount({ 
   assignmentId, 
@@ -24,6 +25,7 @@ export default function EditableAssignmentAmount({
 
     setIsLoading(true)
     await updateAssignmentAmount(assignmentId, newAmount)
+    toast.success('Amount updated successfully')
     setIsLoading(false)
   }
 

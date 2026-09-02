@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { format } from 'date-fns'
 import { MapPin, IndianRupee, Trash2, Loader2, CheckSquare, Square } from 'lucide-react'
 import { deleteWorks } from './actions'
+import { toast } from 'sonner'
 
 type Work = {
   id: string
@@ -70,6 +71,7 @@ export default function WorksList({ works }: { works: Work[] }) {
   const handleDelete = async () => {
     setIsDeleting(true)
     await deleteWorks(Array.from(selectedIds))
+    toast.success(`${selectedIds.size} works deleted successfully`)
     setSelectedIds(new Set())
     setSelectionMode(false)
     setShowConfirm(false)

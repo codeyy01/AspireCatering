@@ -6,6 +6,7 @@ import { CheckSquare, Square } from 'lucide-react'
 import { removeWorker } from './actions'
 import EditableAssignmentAmount from './EditableAssignmentAmount'
 import TogglePaidStatus from './TogglePaidStatus'
+import { toast } from 'sonner'
 
 export default function WorkAssignmentsList({ 
   groupedAssignments
@@ -74,6 +75,7 @@ export default function WorkAssignmentsList({
     })
     
     await removeWorker(allIdsToRemove)
+    toast.success(`Removed ${selectedIds.size} worker${selectedIds.size > 1 ? 's' : ''} from this event`)
     setSelectedIds(new Set())
     setSelectionMode(false)
     setIsDeleting(false)

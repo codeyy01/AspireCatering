@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { updateWorkStatus } from './actions'
 import { Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 export default function WorkStatusSelect({ 
   workId, 
@@ -19,6 +20,7 @@ export default function WorkStatusSelect({
     setStatus(newStatus)
     setIsLoading(true)
     await updateWorkStatus(workId, newStatus)
+    toast.success('Work status updated')
     setIsLoading(false)
   }
 
