@@ -176,15 +176,15 @@ export default function WorkerHistoryList({ assignments }: { assignments: Groupe
       </div>
       
       {selectionMode && selectedWorkIds.size > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-50 animate-in slide-in-from-bottom-full duration-300 rounded-t-3xl pb-safe">
-          <div className="max-w-md mx-auto flex items-center justify-between">
-            <span className="font-bold text-slate-900 text-sm">{selectedWorkIds.size} works selected</span>
+        <div className="fixed bottom-[80px] left-4 right-4 max-w-md mx-auto z-50 animate-in slide-in-from-bottom-4">
+          <div className="bg-slate-900 text-white rounded-2xl p-4 shadow-lg flex items-center justify-between">
+            <span className="font-semibold">{selectedWorkIds.size} selected</span>
             
             <div className="flex space-x-2">
               <button 
                 onClick={handleMarkPaid}
                 disabled={isUpdating}
-                className="flexitems-center bg-emerald-500 text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-emerald-600 active:scale-95 transition-all disabled:opacity-50"
+                className="flex items-center bg-emerald-500 text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-emerald-600 active:scale-95 transition-all disabled:opacity-50"
               >
                 {isUpdating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : 'Mark as Paid'}
               </button>
