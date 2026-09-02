@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { togglePaidStatus } from './actions'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -14,6 +14,10 @@ export default function TogglePaidStatus({
 }) {
   const [status, setStatus] = useState(initialStatus || 'unpaid')
   const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    setStatus(initialStatus || 'unpaid')
+  }, [initialStatus])
 
   const handleToggle = async () => {
     setIsLoading(true)

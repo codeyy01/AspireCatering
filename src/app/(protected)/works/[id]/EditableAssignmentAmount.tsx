@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { updateAssignmentAmount } from './actions'
 import { toast } from 'sonner'
 
@@ -14,6 +14,10 @@ export default function EditableAssignmentAmount({
   const [amount, setAmount] = useState(initialAmount.toString())
   const [isEditing, setIsEditing] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    setAmount(initialAmount.toString())
+  }, [initialAmount])
 
   const handleBlur = async () => {
     setIsEditing(false)
