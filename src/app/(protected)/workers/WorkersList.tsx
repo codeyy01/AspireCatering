@@ -4,6 +4,7 @@ import { useState, useRef } from 'react'
 import Link from 'next/link'
 import { Trash2, Loader2, CheckSquare, Square } from 'lucide-react'
 import { deleteWorkers } from './actions'
+import { toast } from 'sonner'
 
 type Worker = {
   id: string
@@ -56,6 +57,7 @@ export default function WorkersList({ workers }: { workers: Worker[] }) {
   const handleDelete = async () => {
     setIsDeleting(true)
     await deleteWorkers(Array.from(selectedIds))
+    toast.success(`${selectedIds.size} worker${selectedIds.size > 1 ? 's' : ''} deleted successfully`)
     setSelectedIds(new Set())
     setSelectionMode(false)
     setShowConfirm(false)
