@@ -1,34 +1,58 @@
 import { createClient } from '@/utils/supabase/server'
 import { BarChart3, TrendingUp } from 'lucide-react'
-
-// Simple stats page since Recharts is better handled in client components
-// We'll create a simple overview here
+import MonthlyChart from './MonthlyChart'
+import { format, parseISO } from 'date-fns'
 
 export default async function StatsPage() {
   const supabase = createClient()
   
   // Aggregate stats
-  const { data: works } = await supabase.from('works').select('total_amount, status, event_date')
-  const { data: assignments } = await supabase.from('work_assignments').select('agreed_amount, amount_paid')
+  const { data: works } = await supabase.from('works').select('id, total_amount, status, event_date')
+  const { data: assignments } = await supabase.from('work_assignments').select('agreed_amount, amount_paid, works(event_date)')
 
   let totalIncome = 0
   let completedIncome = 0
+  let totalWorkerCost = 0
+  let totalPaidOut = 0
   
+  const monthlyDataMap: Record<string, { month: string, income: number, cost: number, sortKey: string }> = {}
+
   works?.forEach(w => {
     if (w.status !== 'cancelled') totalIncome += Number(w.total_amount || 0)
     if (w.status === 'completed') completedIncome += Number(w.total_amount || 0)
+    
+    if (w.event_date && w.status !== 'cancelled') {
+      const date = parseISO(w.event_date)
+      const monthKey = format(date, 'MMM yyyy')
+      const sortKey = format(date, 'yyyy-MM')
+      if (!monthlyDataMap[monthKey]) {
+        monthlyDataMap[monthKey] = { month: monthKey, income: 0, cost: 0, sortKey }
+      }
+      monthlyDataMap[monthKey].income += Number(w.total_amount || 0)
+    }
   })
 
-  let totalWorkerCost = 0
-  let totalPaidOut = 0
-
-  assignments?.forEach(a => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  assignments?.forEach((a: any) => {
     totalWorkerCost += Number(a.agreed_amount || 0)
     totalPaidOut += Number(a.amount_paid || 0)
+    
+    if (a.works?.event_date) {
+      const date = parseISO(a.works.event_date)
+      const monthKey = format(date, 'MMM yyyy')
+      const sortKey = format(date, 'yyyy-MM')
+      if (!monthlyDataMap[monthKey]) {
+        monthlyDataMap[monthKey] = { month: monthKey, income: 0, cost: 0, sortKey }
+      }
+      monthlyDataMap[monthKey].cost += Number(a.agreed_amount || 0)
+    }
   })
 
   const profit = totalIncome - totalWorkerCost
   const pendingWorkerDues = totalWorkerCost - totalPaidOut
+  
+  // Sort monthly data chronologically (oldest to newest)
+  const monthlyChartData = Object.values(monthlyDataMap).sort((a, b) => a.sortKey.localeCompare(b.sortKey))
 
   return (
     <div className="space-y-6 pb-4 animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out">
@@ -72,10 +96,7 @@ export default async function StatsPage() {
         </div>
       </div>
       
-      <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 text-sm text-blue-800">
-        <p className="font-semibold mb-1">More detailed charts coming soon!</p>
-        <p className="text-blue-600/80">Future updates will include monthly breakdown charts and trend lines.</p>
-      </div>
+      <MonthlyChart data={monthlyChartData} />
 
       <div className="pt-4">
         <a 
