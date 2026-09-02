@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList } from 'recharts'
 import { format, subMonths, addMonths } from 'date-fns'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -36,6 +36,13 @@ export default function MonthlyChart({ data }: { data: any[] }) {
     
     displayData.sort((a, b) => a.sortKey.localeCompare(b.sortKey))
   }
+  
+  // Calculate profit for the chart
+  const chartData = displayData.map(d => ({
+    ...d,
+    profit: d.income - d.cost,
+    profitLabel: (d.income - d.cost) > 0 ? `+₹${((d.income - d.cost)/1000).toFixed(1)}k` : ''
+  }))
 
   return (
     <div className="bg-white p-4 rounded-2xl border border-slate-200 h-80 flex flex-col">
@@ -58,7 +65,7 @@ export default function MonthlyChart({ data }: { data: any[] }) {
       </div>
       <div className="flex-1 min-h-[220px]">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={displayData}>
+          <BarChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
             <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
             <YAxis 
@@ -71,13 +78,16 @@ export default function MonthlyChart({ data }: { data: any[] }) {
             <Tooltip 
               cursor={{ fill: '#f8fafc' }}
               contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-              formatter={(value: unknown) => {
-                if (typeof value === 'number') return [`₹${value.toLocaleString()}`, undefined]
-                return [value as string, undefined]
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              formatter={(value: any, name: any) => {
+                if (typeof value === 'number') return [`₹${value.toLocaleString()}`, name]
+                return [value as string, name]
               }}
             />
             <Legend iconType="circle" wrapperStyle={{ fontSize: 12, paddingTop: '10px' }} />
-            <Bar dataKey="income" name="Income" fill="#0f172a" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="income" name="Income" fill="#0f172a" radius={[4, 4, 0, 0]}>
+              <LabelList dataKey="profitLabel" position="top" style={{ fontSize: 10, fill: '#10b981', fontWeight: 'bold' }} />
+            </Bar>
             <Bar dataKey="cost" name="Worker Cost" fill="#f43f5e" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
