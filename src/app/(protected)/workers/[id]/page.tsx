@@ -1,10 +1,8 @@
 import { createClient } from '@/utils/supabase/server'
-import { format } from 'date-fns'
 import Link from 'next/link'
 import { ArrowLeft, Phone, Briefcase } from 'lucide-react'
 import { notFound } from 'next/navigation'
-import TogglePaidStatus from '../../works/[id]/TogglePaidStatus'
-import EditableAssignmentAmount from '../../works/[id]/EditableAssignmentAmount'
+import WorkerHistoryList from './WorkerHistoryList'
 
 export default async function WorkerDetailPage({
   params
@@ -116,47 +114,7 @@ export default async function WorkerDetailPage({
           Work History ({groupedAssignments.length})
         </h2>
 
-        <div className="space-y-3">
-          {(!groupedAssignments || groupedAssignments.length === 0) ? (
-            <div className="bg-slate-100 rounded-2xl p-6 text-center text-slate-500 text-sm border border-slate-200 border-dashed">
-              No works assigned yet.
-            </div>
-          ) : (
-            groupedAssignments.map(group => {
-              return (
-                <div key={group.workId} className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <Link href={`/works/${group.workId}`} className="font-bold text-slate-900 hover:underline flex items-center">
-                        {group.workTitle}
-                        {group.headcount > 1 && (
-                          <span className="ml-2 text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider">
-                            ({group.headcount} Workers)
-                          </span>
-                        )}
-                      </Link>
-                      <div className="text-xs text-slate-500 mt-0.5">
-                        {group.workDate ? format(new Date(group.workDate), 'MMM d, yyyy') : 'No date'}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="mb-1 flex justify-end">
-                        <EditableAssignmentAmount 
-                          assignmentId={group.assignmentIds} 
-                          initialAmount={group.agreedAmount} 
-                        />
-                      </div>
-                      <TogglePaidStatus 
-                        assignmentId={group.assignmentIds} 
-                        initialStatus={group.paidStatus} 
-                      />
-                    </div>
-                  </div>
-                </div>
-              )
-            })
-          )}
-        </div>
+        <WorkerHistoryList assignments={groupedAssignments} />
       </div>
     </div>
   )

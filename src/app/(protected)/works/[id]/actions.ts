@@ -60,6 +60,30 @@ export async function updateAssignmentAmount(assignmentId: string | string[], am
   revalidatePath('/', 'layout')
 }
 
+export async function markAsPaid(assignmentIds: string[]) {
+  const supabase = createClient()
+  
+  const { data: assignments } = await supabase
+    .from('work_assignments')
+    .select('id, agreed_amount')
+    .in('id', assignmentIds)
+
+  if (!assignments) return
+
+  await Promise.all(assignments.map(a => 
+    supabase
+      .from('work_assignments')
+      .update({ 
+        paid_status: 'paid',
+        amount_paid: a.agreed_amount,
+        paid_date: new Date().toISOString()
+      })
+      .eq('id', a.id)
+  ))
+
+  revalidatePath('/', 'layout')
+}
+
 export async function togglePaidStatus(assignmentId: string | string[], currentStatus: string) {
   const supabase = createClient()
   const newStatus = currentStatus === 'paid' ? 'unpaid' : 'paid'
