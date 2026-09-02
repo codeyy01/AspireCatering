@@ -123,15 +123,31 @@ export default function WorksList({ works }: { works: Work[] }) {
         </div>
       )}
 
-      <div className="space-y-3">
+      <div className="space-y-6">
         {(!filteredWorks || filteredWorks.length === 0) ? (
           <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center text-slate-500 text-sm">
             No works found.
           </div>
         ) : (
-          filteredWorks.map(work => {
-            const isFilled = (work.work_assignments?.[0]?.count || 0) >= (work.guest_count || 0)
-            let displayStatus = work.status
+          (() => {
+            const grouped = filteredWorks.reduce((acc, work) => {
+              const date = new Date(work.event_date)
+              const monthYear = date.toLocaleString('default', { month: 'long', year: 'numeric' })
+              let group = acc.find(g => g.monthYear === monthYear)
+              if (!group) {
+                group = { monthYear, works: [] }
+                acc.push(group)
+              }
+              group.works.push(work)
+              return acc
+            }, [] as { monthYear: string; works: Work[] }[])
+
+            return grouped.map(group => (
+              <div key={group.monthYear} className="space-y-3">
+                <h3 className="text-sm font-bold text-slate-900 px-1 pt-2">{group.monthYear}</h3>
+                {group.works.map(work => {
+                  const isFilled = (work.work_assignments?.[0]?.count || 0) >= (work.guest_count || 0)
+                  let displayStatus = work.status
             if (work.status !== 'completed' && work.status !== 'cancelled') {
               displayStatus = isFilled ? 'Staffed' : 'Needs Staff'
             }
@@ -226,7 +242,10 @@ export default function WorksList({ works }: { works: Work[] }) {
                 </div>
               </Link>
             )
-          })
+            })}
+            </div>
+            ))
+          })()
         )}
       </div>
 

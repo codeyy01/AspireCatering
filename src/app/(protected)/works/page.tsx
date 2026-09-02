@@ -18,7 +18,7 @@ export default async function WorksPage({
   const { data: allWorks } = await supabase
     .from('works')
     .select('*, work_assignments(count)')
-    .order('event_date', { ascending: statusFilter !== 'completed' })
+    .order('event_date', { ascending: false })
 
   let works = allWorks || []
 
